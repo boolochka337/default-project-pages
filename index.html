@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#153b33">
+  <meta name="description" content="Департамент социально-гуманитарной и воспитательной работы ЛГУ им. В. Даля: события, проекты, поддержка студентов и документы">
+  <title>Департамент СГ и ВР | ЛГУ им. В. Даля</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=PT+Serif:wght@700&display=swap');
+
+    :root {
+      --ink: #14231f;
+      --muted: #66746f;
+      --paper: #f3f1e9;
+      --white: #fff;
+      --green: #153b33;
+      --green-light: #285d50;
+      --lime: #dce969;
+      --line: rgba(20, 35, 31, .13);
+      --shadow: 0 24px 60px rgba(21, 59, 51, .12);
+      --radius: 24px;
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      font-synthesis: none;
+      scroll-behavior: smooth;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow-x: hidden; background: var(--paper); }
+    body.menu-open { overflow: hidden; }
+    button, input, textarea { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    section { scroll-margin-top: 90px; }
+    .container { width: min(calc(100% - 40px), 1180px); margin-inline: auto; }
+
+    .skip-link {
+      position: fixed; z-index: 100; top: 12px; left: 12px; padding: 10px 16px;
+      border-radius: 10px; background: var(--lime); transform: translateY(-150%);
+    }
+    .skip-link:focus { transform: none; }
+
+    .topline { background: #0d2d27; color: #dce8e4; font-size: 12px; }
+    .topline-inner { min-height: 37px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .topline p { margin: 0; }
+    .topline-links { display: flex; align-items: center; gap: 22px; }
+    .topline a { transition: color .2s; }
+    .topline a:hover { color: var(--lime); }
+
+    .header {
+      position: sticky; z-index: 50; top: 0; border-bottom: 1px solid transparent;
+      background: rgba(243, 241, 233, .91); backdrop-filter: blur(14px);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .header.scrolled { border-color: var(--line); box-shadow: 0 8px 30px rgba(20, 35, 31, .06); }
+    .nav { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; line-height: 1.12; }
+    .brand-mark {
+      width: 43px; height: 43px; display: grid; place-items: center; flex: 0 0 auto;
+      border-radius: 50%; background: var(--green); color: var(--lime);
+    }
+    .brand-mark svg { width: 23px; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: clamp(18px, 2.5vw, 34px); font-size: 13px; font-weight: 700; }
+    .nav-links a { position: relative; padding: 8px 0; }
+    .nav-links a::after { content: ""; position: absolute; inset: auto 0 0; height: 2px; background: var(--green); transform: scaleX(0); transition: transform .2s; }
+    .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+    .nav-cta { padding: 12px 18px !important; border-radius: 100px; background: var(--green); color: var(--white); }
+    .nav-cta::after { display: none; }
+    .menu-button { display: none; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--green); color: white; cursor: pointer; }
+    .menu-button span, .menu-button::before, .menu-button::after { content: ""; display: block; width: 18px; height: 2px; margin: 4px auto; background: currentColor; transition: .25s; }
+    .menu-button.open span { opacity: 0; }
+    .menu-button.open::before { transform: translateY(6px) rotate(45deg); }
+    .menu-button.open::after { transform: translateY(-6px) rotate(-45deg); }
+
+    .hero { position: relative; padding: 74px 0 86px; overflow: hidden; }
+    .hero::before {
+      content: ""; position: absolute; width: 560px; height: 560px; right: -220px; top: -250px;
+      border: 100px solid rgba(21, 59, 51, .045); border-radius: 50%;
+    }
+    .hero-grid { display: grid; grid-template-columns: 1.12fr .88fr; align-items: center; gap: 76px; }
+    .hero-copy { min-width: 0; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; color: var(--green-light); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 34px; height: 2px; background: var(--green-light); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2 { font-family: "PT Serif", Georgia, serif; }
+    h1 { max-width: 720px; margin-bottom: 25px; font-size: clamp(48px, 6.1vw, 82px); line-height: .99; letter-spacing: -.04em; }
+    h1 em { color: var(--green-light); font-style: normal; }
+    .hero-lead { max-width: 625px; margin-bottom: 34px; color: var(--muted); font-size: 17px; line-height: 1.75; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 24px; border: 1px solid var(--green); border-radius: 100px; background: var(--green); color: white; font-size: 13px; font-weight: 800; cursor: pointer; transition: transform .2s, background .2s; }
+    .button:hover { transform: translateY(-2px); background: var(--green-light); }
+    .button.secondary { background: transparent; color: var(--green); }
+    .button.secondary:hover { background: rgba(21, 59, 51, .07); }
+    .button .arrow { font-size: 19px; line-height: 0; }
+
+    .hero-visual { position: relative; min-height: 490px; }
+    .hero-photo {
+      position: absolute; inset: 0 0 35px 45px; overflow: hidden; border-radius: 220px 220px 28px 28px;
+      background:
+        linear-gradient(150deg, rgba(21,59,51,.06), rgba(21,59,51,.48)),
+        url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1000&q=85') center/cover;
+      box-shadow: var(--shadow);
+    }
+    .hero-card { position: absolute; left: 0; bottom: 0; width: 210px; padding: 25px; border-radius: 20px; background: var(--lime); box-shadow: var(--shadow); }
+    .hero-card strong { display: block; margin-bottom: 5px; font: 700 38px/1 "PT Serif", Georgia, serif; }
+    .hero-card span { font-size: 12px; font-weight: 700; line-height: 1.45; }
+    .hero-badge { position: absolute; top: 45px; right: -27px; width: 108px; height: 108px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.5); background: rgba(255,255,255,.82); backdrop-filter: blur(8px); text-align: center; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; transform: rotate(8deg); }
+
+    .ticker { overflow: hidden; padding: 17px 0; background: var(--green); color: white; }
+    .ticker-track { width: max-content; display: flex; animation: ticker 24s linear infinite; }
+    .ticker-group { display: flex; align-items: center; }
+    .ticker span { display: flex; align-items: center; gap: 28px; padding-right: 28px; font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    .ticker span::after { content: "✦"; color: var(--lime); font-size: 13px; }
+    @keyframes ticker { to { transform: translateX(-50%); } }
+
+    .section { padding: 110px 0; }
+    .section-heading { display: grid; grid-template-columns: .75fr 1.25fr; gap: 50px; margin-bottom: 55px; }
+    .section-heading h2 { margin-bottom: 0; font-size: clamp(37px, 5vw, 58px); line-height: 1.04; letter-spacing: -.025em; }
+    .section-heading > p { max-width: 570px; margin: 6px 0 0 auto; color: var(--muted); line-height: 1.75; }
+
+    .about-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 24px; }
+    .about-feature { min-height: 450px; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; overflow: hidden; border-radius: var(--radius); background: var(--green); color: white; }
+    .about-feature .quote { margin-bottom: auto; color: var(--lime); font: 700 64px/1 Georgia, serif; }
+    .about-feature h3 { max-width: 480px; margin-bottom: 18px; font: 700 clamp(27px, 3vw, 38px)/1.16 "PT Serif", Georgia, serif; }
+    .about-feature p { max-width: 520px; margin-bottom: 0; color: #cbd9d5; line-height: 1.7; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .stat { min-height: 213px; padding: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.45); }
+    .stat:nth-child(2) { background: var(--lime); border-color: transparent; }
+    .stat strong { display: block; margin-bottom: 38px; color: var(--green); font: 700 clamp(42px, 5vw, 62px)/1 "PT Serif", Georgia, serif; }
+    .stat p { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; line-height: 1.5; }
+    .stat:nth-child(2) p { color: var(--ink); }
+
+    .directions { background: #e7e8dc; }
+    .direction-list { border-top: 1px solid var(--line); }
+    .direction { display: grid; grid-template-columns: 75px 1fr 1.15fr 55px; align-items: center; gap: 28px; padding: 31px 8px; border-bottom: 1px solid var(--line); transition: background .25s, padding .25s; }
+    .direction:hover { padding-inline: 22px; background: rgba(255,255,255,.5); }
+    .direction-number { color: var(--green-light); font-size: 12px; font-weight: 800; }
+    .direction h3 { margin: 0; font-size: 20px; }
+    .direction p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .direction-icon { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; font-size: 20px; transition: transform .25s, background .25s; }
+    .direction:hover .direction-icon { background: var(--lime); transform: rotate(-12deg); }
+
+    .news-header { display: flex; align-items: end; justify-content: space-between; gap: 30px; margin-bottom: 44px; }
+    .news-header h2 { margin: 0; font-size: clamp(37px, 5vw, 58px); }
+    .text-link { padding-bottom: 5px; border-bottom: 1px solid var(--ink); font-size: 12px; font-weight: 800; }
+    .news-grid { display: grid; grid-template-columns: 1.25fr .75fr .75fr; gap: 22px; }
+    .news-card { display: flex; flex-direction: column; min-height: 470px; overflow: hidden; border-radius: var(--radius); background: white; box-shadow: 0 12px 35px rgba(21,59,51,.06); }
+    .news-image { min-height: 225px; background-position: center; background-size: cover; transition: transform .4s; }
+    .news-card:hover .news-image { transform: scale(1.025); }
+    .news-card:first-child .news-image { min-height: 255px; background-image: url('https://images.unsplash.com/photo-1529390079861-591de354faf5?auto=format&fit=crop&w=1100&q=85'); }
+    .news-card:nth-child(2) .news-image { background-image: url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=800&q=85'); }
+    .news-card:nth-child(3) .news-image { background-image: url('https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=800&q=85'); }
+    .news-body { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; padding: 25px; background: white; }
+    .news-date { margin-bottom: 17px; color: var(--green-light); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .news-card h3 { margin-bottom: 14px; font-size: 18px; line-height: 1.35; }
+    .news-card:first-child h3 { font-size: 23px; }
+    .news-card p { margin-bottom: 25px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .news-card .text-link { align-self: flex-start; margin-top: auto; }
+
+    .team { background: var(--green); color: white; }
+    .team .eyebrow { color: var(--lime); }
+    .team .eyebrow::before { background: var(--lime); }
+    .team .section-heading > p { color: #b8ccc6; }
+    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .person { display: grid; grid-template-columns: 165px 1fr; min-height: 210px; overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: var(--radius); background: rgba(255,255,255,.055); }
+    .person-photo { min-height: 210px; background-position: center; background-size: cover; filter: grayscale(1); }
+    .person:first-child .person-photo { background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=500&q=80'); }
+    .person:nth-child(2) .person-photo { background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=500&q=80'); }
+    .person-info { display: flex; flex-direction: column; justify-content: center; padding: 27px; }
+    .person-info small { margin-bottom: 12px; color: var(--lime); font-size: 9px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    .person-info h3 { margin-bottom: 8px; font-size: 19px; }
+    .person-info p { margin: 0; color: #b8ccc6; font-size: 12px; line-height: 1.5; }
+
+    .documents-grid { display: grid; grid-template-columns: .8fr 1.2fr; align-items: start; gap: 80px; }
+    .documents-copy h2 { font-size: clamp(37px, 5vw, 58px); line-height: 1.05; }
+    .documents-copy p { color: var(--muted); line-height: 1.7; }
+    .document-list { border-top: 1px solid var(--line); }
+    .document { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 17px; padding: 20px 5px; border-bottom: 1px solid var(--line); }
+    .document-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: rgba(21,59,51,.08); color: var(--green); font-size: 10px; font-weight: 800; }
+    .document h3 { margin: 0 0 4px; font-size: 14px; }
+    .document small { color: var(--muted); font-size: 10px; }
+    .download { border: 0; background: transparent; color: var(--green); font-size: 21px; cursor: pointer; }
+
+    .contact { padding: 0 0 45px; }
+    .contact-box { position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 70px; padding: 65px; border-radius: 32px; background: var(--lime); }
+    .contact-box::after { content: ""; position: absolute; width: 310px; height: 310px; right: -130px; bottom: -180px; border: 60px solid rgba(21,59,51,.09); border-radius: 50%; }
+    .contact h2 { max-width: 450px; margin-bottom: 20px; font-size: clamp(38px, 5vw, 58px); line-height: 1.02; }
+    .contact-copy > p { max-width: 480px; line-height: 1.7; }
+    .contact-details { display: grid; gap: 17px; margin-top: 31px; }
+    .contact-row { display: flex; align-items: baseline; gap: 14px; font-size: 13px; }
+    .contact-row strong { min-width: 80px; font-size: 11px; text-transform: uppercase; }
+    .contact-form { position: relative; z-index: 1; display: grid; gap: 12px; padding: 28px; border-radius: 22px; background: var(--green); }
+    .contact-form label { color: #c4d5d0; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .contact-form input, .contact-form textarea { width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(255,255,255,.25); outline: 0; background: transparent; color: white; }
+    .contact-form input:focus, .contact-form textarea:focus { border-color: var(--lime); }
+    .contact-form textarea { min-height: 70px; resize: vertical; }
+    .contact-form .button { margin-top: 5px; border-color: var(--lime); background: var(--lime); color: var(--ink); }
+    .form-status { min-height: 18px; margin: 0; color: var(--lime); font-size: 11px; text-align: center; }
+
+    .footer { padding: 25px 0 35px; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding-top: 25px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .footer-links { display: flex; gap: 23px; }
+    .footer a:hover { color: var(--green); }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s, transform .7s; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    .priority-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 42px; }
+    .priority-card { position: relative; min-height: 195px; display: flex; flex-direction: column; padding: 23px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.52); }
+    .priority-card:first-child { background: var(--lime); border-color: transparent; }
+    .priority-card time { color: var(--green-light); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .priority-card h3 { margin: 27px 0 10px; font-size: 17px; line-height: 1.3; }
+    .priority-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .priority-card a { margin-top: auto; padding-top: 18px; font-size: 12px; font-weight: 800; }
+
+    .about-notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+    .about-note { padding: 24px; border-left: 3px solid var(--green); background: rgba(255,255,255,.45); }
+    .about-note strong { display: block; margin-bottom: 8px; font-size: 13px; }
+    .about-note span { color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+    .filters { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 32px; }
+    .filter-button { padding: 10px 16px; border: 1px solid var(--line); border-radius: 100px; background: transparent; color: var(--ink); font-size: 11px; font-weight: 800; cursor: pointer; transition: .2s; }
+    .filter-button:hover, .filter-button.active { border-color: var(--green); background: var(--green); color: white; }
+    .event-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .event-card { min-height: 350px; display: flex; flex-direction: column; padding: 28px; border-radius: var(--radius); background: white; box-shadow: 0 12px 35px rgba(21,59,51,.06); }
+    .event-card[hidden] { display: none; }
+    .event-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .event-date { width: 58px; flex: 0 0 auto; padding: 10px 5px; border-radius: 15px; background: var(--lime); text-align: center; }
+    .event-date strong { display: block; font: 700 25px/1 "PT Serif", Georgia, serif; }
+    .event-date span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
+    .tag { padding: 7px 10px; border-radius: 100px; background: rgba(21,59,51,.07); color: var(--green); font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .event-card h3 { margin: 27px 0 13px; font-size: 20px; line-height: 1.3; }
+    .event-card > p { color: var(--muted); font-size: 12px; line-height: 1.65; }
+    .event-meta { display: grid; gap: 6px; margin: auto 0 20px; padding-top: 20px; color: var(--muted); font-size: 11px; }
+    .event-card .button { min-height: 43px; padding-inline: 16px; font-size: 11px; }
+    .empty-events { grid-column: 1 / -1; padding: 30px; border: 1px dashed var(--line); border-radius: 18px; color: var(--muted); text-align: center; }
+
+    .results { background: #e7e8dc; }
+    .impact-grid { display: grid; grid-template-columns: 1.2fr .8fr .8fr; gap: 20px; }
+    .impact-card { min-height: 250px; padding: 30px; border-radius: var(--radius); background: var(--green); color: white; }
+    .impact-card:not(:first-child) { background: white; color: var(--ink); }
+    .impact-card strong { display: block; margin-bottom: 34px; color: var(--lime); font: 700 50px/1 "PT Serif", Georgia, serif; }
+    .impact-card:not(:first-child) strong { color: var(--green); }
+    .impact-card h3 { margin-bottom: 10px; font-size: 18px; }
+    .impact-card p { margin: 0; color: #bdd0ca; font-size: 12px; line-height: 1.65; }
+    .impact-card:not(:first-child) p { color: var(--muted); }
+    .report-list { margin-top: 25px; border-top: 1px solid var(--line); }
+    .report { display: grid; grid-template-columns: 120px 1fr auto; gap: 20px; align-items: center; padding: 20px 4px; border-bottom: 1px solid var(--line); }
+    .report time { color: var(--green-light); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .report h3 { margin: 0; font-size: 14px; }
+
+    .support-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 24px; }
+    .support-main { padding: 40px; border-radius: var(--radius); background: var(--green); color: white; }
+    .support-main h3 { margin-bottom: 17px; font: 700 32px/1.15 "PT Serif", Georgia, serif; }
+    .support-main p { color: #bdd0ca; line-height: 1.7; }
+    .support-main .button { margin-top: 15px; border-color: var(--lime); background: var(--lime); color: var(--ink); }
+    .support-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .support-card { padding: 27px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.48); }
+    .support-card .symbol { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 35px; border-radius: 50%; background: var(--lime); font-size: 18px; }
+    .support-card h3 { margin-bottom: 9px; font-size: 16px; }
+    .support-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .privacy-note { margin-top: 20px; padding: 17px 20px; border: 1px solid rgba(220,233,105,.35); border-radius: 14px; color: #d9e4e0; font-size: 11px; line-height: 1.6; }
+
+    .partner-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .partner-card { min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 25px; border: 1px solid var(--line); border-radius: 20px; background: white; color: var(--ink); transition: transform .2s, box-shadow .2s; }
+    .partner-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .partner-logo { color: var(--green); font: 700 21px/1.15 "PT Serif", Georgia, serif; }
+    .partner-card p { margin: 20px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .partner-card a { margin-top: 15px; font-size: 11px; font-weight: 800; }
+
+    .contact-form select { width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(255,255,255,.25); outline: 0; background: var(--green); color: white; }
+    .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .field { display: grid; gap: 3px; }
+
+    @media (max-width: 960px) {
+      .menu-button { display: block; }
+      .nav-links { position: fixed; inset: 78px 0 auto; display: grid; gap: 3px; padding: 22px 20px 30px; border-bottom: 1px solid var(--line); background: var(--paper); transform: translateY(-140%); opacity: 0; transition: .25s; }
+      .nav-links.open { transform: none; opacity: 1; }
+      .nav-links a { padding: 13px 8px; }
+      .nav-cta { margin-top: 5px; text-align: center; }
+      .hero-grid { grid-template-columns: 1fr; gap: 52px; }
+      .hero-copy { max-width: 760px; }
+      .hero-visual { width: min(100%, 650px); min-height: 520px; margin-inline: auto; }
+      .section-heading { grid-template-columns: 1fr; gap: 18px; }
+      .section-heading > p { margin-left: 0; }
+      .about-grid { grid-template-columns: 1fr; }
+      .news-grid { grid-template-columns: 1fr 1fr; }
+      .news-card:first-child { grid-column: 1 / -1; }
+      .team-grid { grid-template-columns: 1fr; }
+      .documents-grid { grid-template-columns: 1fr; gap: 38px; }
+      .contact-box { grid-template-columns: 1fr; gap: 40px; padding: 50px; }
+      .priority-grid, .partner-grid { grid-template-columns: 1fr 1fr; }
+      .event-grid { grid-template-columns: 1fr 1fr; }
+      .impact-grid { grid-template-columns: 1fr 1fr; }
+      .impact-card:first-child { grid-column: 1 / -1; }
+      .support-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .container { width: min(calc(100% - 28px), 1180px); }
+      .topline { display: none; }
+      .nav { min-height: 68px; }
+      .nav-links { inset-block-start: 68px; }
+      .brand span:last-child { font-size: 13px; }
+      .hero { padding: 50px 0 65px; }
+      h1 { overflow-wrap: anywhere; font-size: clamp(39px, 10.5vw, 48px); }
+      .hero-lead { font-size: 15px; }
+      .hero-actions .button { width: 100%; }
+      .hero-visual { min-height: 390px; }
+      .hero-photo { inset: 0 0 25px 20px; border-radius: 160px 160px 24px 24px; }
+      .hero-badge { right: -5px; top: 30px; width: 86px; height: 86px; font-size: 8px; }
+      .hero-card { width: 170px; padding: 19px; }
+      .hero-card strong { font-size: 31px; }
+      .section { padding: 78px 0; }
+      .about-feature { min-height: 390px; padding: 28px; }
+      .stats-grid { grid-template-columns: 1fr; gap: 14px; }
+      .stat { min-height: 175px; }
+      .stat strong { margin-bottom: 27px; }
+      .direction { grid-template-columns: 43px 1fr 45px; gap: 12px; padding: 24px 3px; }
+      .direction p { grid-column: 2 / -1; }
+      .news-grid { grid-template-columns: 1fr; }
+      .news-card:first-child { grid-column: auto; }
+      .news-card { min-height: 430px; }
+      .person { grid-template-columns: 115px 1fr; }
+      .contact-box { padding: 32px 22px; border-radius: 24px; }
+      .contact-form { padding: 23px 20px; }
+      .contact-row { display: grid; gap: 5px; }
+      .footer-inner { align-items: flex-start; flex-direction: column; }
+      .footer-links { flex-wrap: wrap; }
+      .priority-grid, .about-notes, .event-grid, .impact-grid, .partner-grid { grid-template-columns: 1fr; }
+      .impact-card:first-child { grid-column: auto; }
+      .support-options { grid-template-columns: 1fr; }
+      .report { grid-template-columns: 1fr auto; }
+      .report time { grid-column: 1 / -1; }
+      .field-pair { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к содержанию</a>
+
+  <div class="topline">
+    <div class="container topline-inner">
+      <p>ФГБОУ ВО «Луганский государственный университет имени Владимира Даля»</p>
+      <div class="topline-links"><a href="#documents">Документы</a><a href="#contacts">Контакты</a><a href="#support">Психологическая помощь</a></div>
+    </div>
+  </div>
+
+  <header class="header" id="header">
+    <div class="container nav">
+      <a class="brand" href="#main" aria-label="На главную">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 18V8l8-4 8 4v10M2 20h20M8 18v-6h8v6M9 8h6"/></svg></span>
+        <span>Департамент СГ и ВР<small>ЛГУ им. В. Даля</small></span>
+      </a>
+      <nav class="nav-links" id="nav-links" aria-label="Основная навигация">
+        <a href="#about">О нас</a><a href="#events">События</a><a href="#results">Результаты</a><a href="#support">Поддержка</a><a href="#projects">Проекты</a><a class="nav-cta" href="#contacts">Обратиться</a>
+      </nav>
+      <button class="menu-button" id="menu-button" type="button" aria-label="Открыть меню" aria-expanded="false"><span></span></button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <div class="eyebrow">ЛГУ им. В. Даля • Молодёжная политика</div>
+          <h1>Вместе создаём <em>университетскую среду</em></h1>
+          <p class="hero-lead">Помогаем студентам находить единомышленников, запускать проекты, участвовать в общественной жизни и получать поддержку. Здесь начинается путь от идеи к реальному результату.</p>
+          <div class="hero-actions"><a class="button" href="#contacts">Подать инициативу <span class="arrow">↗</span></a><a class="button secondary" href="#events">Смотреть события</a></div>
+        </div>
+        <div class="hero-visual reveal">
+          <div class="hero-photo" role="img" aria-label="Студенты университета"></div>
+          <div class="hero-card"><strong>120+</strong><span>мероприятий и молодёжных инициатив за учебный год</span></div>
+          <div class="hero-badge">Учись<br>создавай<br>действуй</div>
+        </div>
+      </div>
+      <div class="container priority-grid" aria-label="Приоритетные события месяца">
+        <article class="priority-card reveal"><time datetime="2026-10-03">03 октября</time><h3>Школа студенческого актива</h3><p>Интенсив для лидеров объединений.</p><a href="#events">Подробнее →</a></article>
+        <article class="priority-card reveal"><time datetime="2026-10-10">10 октября</time><h3>Добровольческая акция «Рядом»</h3><p>Помогаем городу вместе.</p><a href="#events">Подробнее →</a></article>
+        <article class="priority-card reveal"><time datetime="2026-10-17">17 октября</time><h3>Диалог о важном</h3><p>Открытая встреча с экспертами.</p><a href="#events">Подробнее →</a></article>
+        <article class="priority-card reveal"><time datetime="2026-10-24">24 октября</time><h3>Фестиваль студенческих клубов</h3><p>Творчество, спорт и новые знакомства.</p><a href="#events">Подробнее →</a></article>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true"><div class="ticker-track"><div class="ticker-group"><span>Патриотическое воспитание</span><span>Добровольчество</span><span>Психологическая поддержка</span><span>Студенческие проекты</span></div><div class="ticker-group"><span>Патриотическое воспитание</span><span>Добровольчество</span><span>Психологическая поддержка</span><span>Студенческие проекты</span></div></div></div>
+
+    <section class="section" id="about">
+      <div class="container">
+        <div class="section-heading reveal"><div><div class="eyebrow">О департаменте</div><h2>Среда для роста, диалога и созидания</h2></div><p>Департамент координирует воспитательную и социально-гуманитарную работу ЛГУ им. В. Даля. Наша миссия — помочь каждому студенту раскрыть потенциал, почувствовать ответственность за общее будущее и найти своё место в университетском сообществе.</p></div>
+        <div class="about-grid">
+          <article class="about-feature reveal"><div class="quote">“</div><h3>От студенческой идеи до проекта университетского масштаба</h3><p>Мы развиваем студенческое самоуправление, поддерживаем добровольчество, патриотические и творческие инициативы, организуем профилактическую работу и обеспечиваем доступ к психологической помощи.</p></article>
+          <div class="stats-grid">
+            <article class="stat reveal"><strong>5 000+</strong><p>участников событий и проектов в течение года</p></article>
+            <article class="stat reveal"><strong>120+</strong><p>мероприятий разного формата</p></article>
+            <article class="stat reveal"><strong>20+</strong><p>студенческих объединений и команд</p></article>
+            <article class="stat reveal"><strong>15+</strong><p>партнёрских программ и проектов</p></article>
+          </div>
+        </div>
+        <div class="about-notes reveal">
+          <div class="about-note"><strong>Задачи</strong><span>Развивать гражданскую ответственность, поддерживать инициативы и создавать безопасную среду.</span></div>
+          <div class="about-note"><strong>Структура</strong><span>Молодёжная политика, воспитательная работа, социальная и психологическая поддержка.</span></div>
+          <div class="about-note"><strong>График работы</strong><span>Понедельник–пятница, 09:00–17:00. Приём по предварительной записи.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section directions" id="directions">
+      <div class="container">
+        <div class="section-heading reveal"><div><div class="eyebrow">Направления работы</div><h2>Помогаем участвовать и развиваться</h2></div><p>Работа департамента объединяет ключевые направления молодёжной политики: от гражданского воспитания до поддержки личного благополучия студентов.</p></div>
+        <div class="direction-list">
+          <article class="direction reveal"><span class="direction-number">01</span><h3>Патриотическое воспитание</h3><p>Историческая память, гражданская ответственность, университетские и городские акции.</p><span class="direction-icon">↗</span></article>
+          <article class="direction reveal"><span class="direction-number">02</span><h3>Студенческие инициативы</h3><p>Самоуправление, грантовые конкурсы, клубы и проектные команды.</p><span class="direction-icon">↗</span></article>
+          <article class="direction reveal"><span class="direction-number">03</span><h3>Профилактика и безопасность</h3><p>Просветительские программы и профилактика деструктивного поведения.</p><span class="direction-icon">↗</span></article>
+          <article class="direction reveal"><span class="direction-number">04</span><h3>Творчество и досуг</h3><p>Фестивали, конкурсы, культурные события и творческие объединения.</p><span class="direction-icon">↗</span></article>
+          <article class="direction reveal"><span class="direction-number">05</span><h3>Добровольчество</h3><p>Социальные, экологические и патриотические волонтёрские проекты.</p><span class="direction-icon">↗</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="events">
+      <div class="container">
+        <div class="section-heading reveal"><div><div class="eyebrow">Календарь</div><h2>Мероприятия и проекты</h2></div><p>Выберите интересующее направление, узнайте условия участия и зарегистрируйтесь. Календарь можно обновлять по мере появления новых событий.</p></div>
+        <div class="filters reveal" role="group" aria-label="Фильтр мероприятий">
+          <button class="filter-button active" type="button" data-filter="all">Все события</button><button class="filter-button" type="button" data-filter="volunteer">Волонтёрство</button><button class="filter-button" type="button" data-filter="patriot">Патриотизм</button><button class="filter-button" type="button" data-filter="prevention">Профилактика</button><button class="filter-button" type="button" data-filter="leisure">Досуг</button>
+        </div>
+        <div class="event-grid" id="event-grid">
+          <article class="event-card reveal" data-category="patriot"><div class="event-top"><div class="event-date"><strong>03</strong><span>окт</span></div><span class="tag">Патриотизм</span></div><h3>Форум «Я горжусь»</h3><p>Открытая площадка для разговора об исторической памяти, достижениях страны и роли молодёжи.</p><div class="event-meta"><span>Для студентов всех курсов</span><span>Заявки до 30 сентября</span></div><a class="button" href="#contacts">Зарегистрироваться</a></article>
+          <article class="event-card reveal" data-category="volunteer"><div class="event-top"><div class="event-date"><strong>10</strong><span>окт</span></div><span class="tag">Волонтёрство</span></div><h3>Акция «Рядом»</h3><p>Командный выезд и адресная помощь людям, которым необходима поддержка.</p><div class="event-meta"><span>18+, количество мест ограничено</span><span>Заявки до 7 октября</span></div><a class="button" href="#contacts">Стать участником</a></article>
+          <article class="event-card reveal" data-category="prevention"><div class="event-top"><div class="event-date"><strong>17</strong><span>окт</span></div><span class="tag">Профилактика</span></div><h3>Диалог «Безопасная среда»</h3><p>Встреча со специалистами о цифровой безопасности, стрессоустойчивости и взаимопомощи.</p><div class="event-meta"><span>Участие свободное</span><span>Регистрация до 16 октября</span></div><a class="button" href="#contacts">Записаться</a></article>
+          <article class="event-card reveal" data-category="leisure"><div class="event-top"><div class="event-date"><strong>24</strong><span>окт</span></div><span class="tag">Досуг</span></div><h3>Фестиваль студенческих клубов</h3><p>Презентации объединений, творческие номера, мастер-классы и знакомство с командами.</p><div class="event-meta"><span>Для студентов и абитуриентов</span><span>Вход свободный</span></div><a class="button" href="#contacts">Узнать больше</a></article>
+          <article class="event-card reveal" data-category="volunteer"><div class="event-top"><div class="event-date"><strong>01</strong><span>ноя</span></div><span class="tag">Волонтёрство</span></div><h3>Школа волонтёра</h3><p>Практический курс для тех, кто хочет уверенно начать добровольческую деятельность.</p><div class="event-meta"><span>Возраст 16+</span><span>Заявки до 27 октября</span></div><a class="button" href="#contacts">Подать заявку</a></article>
+          <article class="event-card reveal" data-category="patriot"><div class="event-top"><div class="event-date"><strong>08</strong><span>ноя</span></div><span class="tag">Патриотизм</span></div><h3>Медиапроект «Голос поколения»</h3><p>Создайте короткий видеосюжет о людях, событиях и местах, которыми гордитесь.</p><div class="event-meta"><span>Команды от 2 до 5 человек</span><span>Работы до 5 ноября</span></div><a class="button" href="#contacts">Участвовать</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section results" id="results">
+      <div class="container">
+        <div class="section-heading reveal"><div><div class="eyebrow">Результаты и отчёты</div><h2>Показываем эффект нашей работы</h2></div><p>Рассказываем не только о количестве мероприятий, но и о том, как они меняют университетскую среду и открывают новые возможности для студентов.</p></div>
+        <div class="impact-grid">
+          <article class="impact-card reveal"><strong>72%</strong><h3>участников возвращаются в новые проекты</h3><p>Активное сообщество становится точкой роста для новых студенческих инициатив.</p></article>
+          <article class="impact-card reveal"><strong>34</strong><h3>инициативы поддержано</h3><p>От локальных акций до межвузовских проектов.</p></article>
+          <article class="impact-card reveal"><strong>9</strong><h3>побед в конкурсах</h3><p>Команды университета получают признание и поддержку.</p></article>
+        </div>
+        <div class="report-list reveal">
+          <div class="report"><time>Сентябрь 2026</time><h3>Адаптация первокурсников и развитие студенческих сообществ</h3><button class="download" type="button" aria-label="Открыть доклад">↗</button></div>
+          <div class="report"><time>Август 2026</time><h3>Приоритеты воспитательной работы в новом учебном году</h3><button class="download" type="button" aria-label="Открыть доклад">↗</button></div>
+          <div class="report"><time>Июнь 2026</time><h3>Итоги молодёжных и добровольческих проектов университета</h3><button class="download" type="button" aria-label="Открыть отчёт">↗</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="support">
+      <div class="container">
+        <div class="section-heading reveal"><div><div class="eyebrow">Психологическая служба</div><h2>Просить о помощи — нормально</h2></div><p>Если вы столкнулись со стрессом, тревогой, трудностями в учёбе или отношениях, специалист поможет разобраться в ситуации. Консультации конфиденциальны и бесплатны для студентов.</p></div>
+        <div class="support-grid">
+          <article class="support-main reveal"><h3>Запишитесь на индивидуальную консультацию</h3><p>Приём проходит по предварительной записи с понедельника по пятницу, с 09:00 до 17:00. В обращении можно выбрать удобный способ связи.</p><a class="button" href="#contacts" data-subject="consultation">Записаться к психологу</a><div class="privacy-note">Содержание обращения доступно только специалисту психологической службы. В экстренной ситуации обращайтесь по номеру 112.</div></article>
+          <div class="support-options">
+            <article class="support-card reveal"><span class="symbol">○</span><h3>Как справиться со стрессом</h3><p>Короткая памятка с техниками самопомощи и восстановления.</p></article>
+            <article class="support-card reveal"><span class="symbol">◇</span><h3>Адаптация первокурсника</h3><p>Как привыкнуть к новому ритму и найти поддержку в университете.</p></article>
+            <article class="support-card reveal"><span class="symbol">△</span><h3>Конфликтная ситуация</h3><p>Что делать, если договориться самостоятельно не получается.</p></article>
+            <article class="support-card reveal"><span class="symbol">＋</span><h3>Часы приёма</h3><p>Пн–Пт, 09:00–17:00. Кабинет и телефон уточняются.</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section team" id="projects">
+      <div class="container">
+        <div class="section-heading reveal"><div><div class="eyebrow">Партнёры и нацпроекты</div><h2>Возможности федерального масштаба</h2></div><p>Помогаем студентам включаться в крупнейшие молодёжные программы, находить ресурсы для проектов и представлять университет на внешних площадках.</p></div>
+        <div class="partner-grid">
+          <article class="partner-card reveal"><div class="partner-logo">Молодёжь<br>и дети</div><p>Национальный проект для развития потенциала молодого поколения.</p><a href="#contacts">Узнать возможности →</a></article>
+          <article class="partner-card reveal"><div class="partner-logo">Твой Ход</div><p>Всероссийский студенческий проект и сообщество активной молодёжи.</p><a href="#contacts">Присоединиться →</a></article>
+          <article class="partner-card reveal"><div class="partner-logo">Движение<br>Первых</div><p>Проекты для развития, добровольчества, творчества и командной работы.</p><a href="#contacts">Подробнее →</a></article>
+          <article class="partner-card reveal"><div class="partner-logo">Росмолодёжь.<br>Гранты</div><p>Грантовая поддержка социальных и молодёжных инициатив.</p><a href="#contacts">Подготовить заявку →</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="documents">
+      <div class="container documents-grid">
+        <div class="documents-copy reveal"><div class="eyebrow">Документы</div><h2>Всё важное в одном месте</h2><p>Положения, приказы, формы заявок, планы и методические рекомендации. Кнопки готовы для подключения реальных файлов.</p></div>
+        <div class="document-list reveal">
+          <div class="document"><span class="document-icon">PDF</span><div><h3>Положение о департаменте СГ и ВР</h3><small>Нормативные документы</small></div><button class="download" type="button" aria-label="Скачать положение">↓</button></div>
+          <div class="document"><span class="document-icon">DOC</span><div><h3>Заявка на проведение мероприятия</h3><small>Формы и шаблоны</small></div><button class="download" type="button" aria-label="Скачать заявку">↓</button></div>
+          <div class="document"><span class="document-icon">PDF</span><div><h3>Календарный план воспитательной работы</h3><small>Планы работы</small></div><button class="download" type="button" aria-label="Скачать план">↓</button></div>
+          <div class="document"><span class="document-icon">PDF</span><div><h3>Методические рекомендации для кураторов</h3><small>Методические материалы</small></div><button class="download" type="button" aria-label="Скачать рекомендации">↓</button></div>
+          <div class="document"><span class="document-icon">PDF</span><div><h3>Памятки по профилактической работе</h3><small>Информационные материалы</small></div><button class="download" type="button" aria-label="Скачать памятки">↓</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contacts">
+      <div class="container contact-box reveal">
+        <div class="contact-copy"><div class="eyebrow">Контакты и обратная связь</div><h2>Расскажите о своей идее</h2><p>Задайте вопрос, предложите проект или запишитесь на консультацию. Мы направим обращение ответственному специалисту.</p><div class="contact-details"><div class="contact-row"><strong>Адрес</strong><span>ЛГУ им. В. Даля, корпус и кабинет уточняются</span></div><div class="contact-row"><strong>График</strong><span>Пн–Пт, 09:00–17:00</span></div><div class="contact-row"><strong>Телефон</strong><span>укажите официальный номер</span></div><div class="contact-row"><strong>E-mail</strong><span>укажите официальный адрес</span></div><div class="contact-row"><strong>Соцсети</strong><span>ВКонтакте • Telegram</span></div></div></div>
+        <form class="contact-form" id="contact-form">
+          <div class="field-pair"><div class="field"><label for="name">Ваше имя</label><input id="name" name="name" autocomplete="name" required></div><div class="field"><label for="role">Кто вы</label><select id="role" name="role"><option>Студент</option><option>Куратор</option><option>Преподаватель</option><option>Партнёр</option><option>Другое</option></select></div></div>
+          <label for="email">Электронная почта</label><input id="email" name="email" type="email" autocomplete="email" required>
+          <label for="subject">Тема обращения</label><select id="subject" name="subject"><option value="initiative">Хочу предложить инициативу</option><option value="event">Вопрос по мероприятию</option><option value="consultation">Запись к психологу</option><option value="partnership">Сотрудничество</option><option value="other">Другой вопрос</option></select>
+          <label for="message">Сообщение</label><textarea id="message" name="message" placeholder="Коротко опишите ваш вопрос или идею" required></textarea>
+          <button class="button" type="submit">Отправить обращение</button><p class="form-status" id="form-status" role="status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="container footer-inner"><p>© <span id="year"></span> Департамент социально-гуманитарной и воспитательной работы ЛГУ им. В. Даля</p><div class="footer-links"><a href="#documents">Документы</a><a href="#contacts">Контакты</a><a href="#main">Наверх ↑</a></div></div></footer>
+
+  <script>
+    const header = document.getElementById('header');
+    const menuButton = document.getElementById('menu-button');
+    const navLinks = document.getElementById('nav-links');
+    const sections = [...document.querySelectorAll('main section[id]')];
+    const navAnchors = [...navLinks.querySelectorAll('a[href^="#"]')];
+
+    function closeMenu() {
+      menuButton.classList.remove('open');
+      navLinks.classList.remove('open');
+      menuButton.setAttribute('aria-expanded', 'false');
+      menuButton.setAttribute('aria-label', 'Открыть меню');
+      document.body.classList.remove('menu-open');
+    }
+
+    menuButton.addEventListener('click', () => {
+      const open = !navLinks.classList.contains('open');
+      menuButton.classList.toggle('open', open);
+      navLinks.classList.toggle('open', open);
+      menuButton.setAttribute('aria-expanded', String(open));
+      menuButton.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+      document.body.classList.toggle('menu-open', open);
+    });
+
+    navAnchors.forEach(link => link.addEventListener('click', closeMenu));
+    window.addEventListener('resize', () => { if (window.innerWidth > 960) closeMenu(); });
+
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 10);
+      let current = '';
+      sections.forEach(section => { if (window.scrollY >= section.offsetTop - 160) current = section.id; });
+      navAnchors.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${current}`));
+    }, { passive: true });
+
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .1 });
+    document.querySelectorAll('.reveal').forEach(element => revealObserver.observe(element));
+
+    const filterButtons = [...document.querySelectorAll('.filter-button')];
+    const eventCards = [...document.querySelectorAll('.event-card')];
+    filterButtons.forEach(button => button.addEventListener('click', () => {
+      const filter = button.dataset.filter;
+      filterButtons.forEach(item => item.classList.toggle('active', item === button));
+      eventCards.forEach(card => {
+        card.hidden = filter !== 'all' && card.dataset.category !== filter;
+      });
+    }));
+
+    document.querySelectorAll('[data-subject]').forEach(link => link.addEventListener('click', () => {
+      document.getElementById('subject').value = link.dataset.subject;
+    }));
+
+    document.querySelectorAll('.download').forEach(button => button.addEventListener('click', () => {
+      const original = button.textContent;
+      button.textContent = '✓';
+      button.title = 'Для скачивания необходимо добавить реальный файл';
+      setTimeout(() => { button.textContent = original; }, 1400);
+    }));
+
+    document.getElementById('contact-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const status = document.getElementById('form-status');
+      status.textContent = 'Спасибо! Обращение принято. Мы свяжемся с вами указанным способом.';
+      event.target.reset();
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
