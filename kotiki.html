@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070d18">
+  <title>КОТИКИ // три в ряд</title>
+  <style>
+    :root { font-family: "Segoe UI", Arial, sans-serif; color: #e9faff; background: #070d18; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: linear-gradient(#5be8e50b 1px, transparent 1px), linear-gradient(90deg,#5be8e50b 1px,transparent 1px), radial-gradient(circle at 12% 35%,#12415180,transparent 37%),radial-gradient(circle at 90% 75%,#27235c91,transparent 37%),#070d18; background-size: 44px 44px,44px 44px,auto,auto,auto; }
+    button { font: inherit; }
+    .layout { width: min(1100px,calc(100% - 32px)); min-height: 100vh; margin: auto; padding: 32px 0; display: grid; grid-template-columns: minmax(270px,1fr) minmax(320px,550px); align-items: center; gap: clamp(24px,5vw,85px); }
+    .tag,.label,.heading,.guide,.notice,.stat small,.meter-label,.level,.action { font-family: Consolas,"Courier New",monospace; }
+    .tag { display: inline-block; border: 1px solid #4acdd481; padding: 9px 12px; color: #71e5e9; font-size: 11px; letter-spacing: .17em; }
+    h1 { margin: 25px 0 15px; font-size: clamp(48px,7vw,88px); line-height: .95; letter-spacing: -.065em; text-transform: uppercase; text-shadow: 0 0 36px #47f3ec38; }
+    h1 span { color: #72f2e5; }
+    .intro p { max-width: 370px; font-size: 16px; line-height: 1.7; color: #abc3d0; }
+    .instructions { margin-top: 36px; border-left: 2px solid #68eee6; padding-left: 17px; color: #87abbc; font-size: 13px; line-height: 1.6; }
+    .instructions strong { display: block; color: #89f4ed; letter-spacing: .13em; margin-bottom: 5px; }
+    .panel { padding: clamp(12px,2.3vw,24px); border: 1px solid #3c7584; background: linear-gradient(140deg,#13293a,#091725 60%,#111b34); box-shadow: 0 28px 75px #000a,0 0 38px #24cde519; }
+    .panel::before { content: ""; display: block; height: 2px; width: 60px; background: #71f2e7; box-shadow: 0 0 18px #71f2e7; margin: -1px 0 14px; }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .heading { font-weight: bold; letter-spacing: .15em; font-size: 14px; color: #89f7ed; }
+    .level { color: #90b8c6; font-size: 10px; letter-spacing: .11em; border: 1px solid #356174; padding: 8px; }
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .stat { border: 1px solid #275367; border-top-color: #68cdd7; background: #061522; padding: 10px; }
+    .stat small { display: block; color: #8aaebe; letter-spacing: .12em; font-size: 10px; }
+    .stat strong { display: block; margin-top: 5px; font: bold clamp(21px,3vw,28px) Consolas,"Courier New",monospace; font-variant-numeric: tabular-nums; }
+    .stat:nth-child(2) strong { color: #f4bb85; }
+    .stat:nth-child(3) strong { color: #79f1e5; }
+    .meter-label { display: flex; justify-content: space-between; color: #9cb9c4; font-size: 10px; margin: 14px 2px 7px; letter-spacing: .06em; }
+    .meter { height: 5px; background: #04131d; margin-bottom: 17px; }
+    .meter-fill { width: 0; height: 100%; background: linear-gradient(90deg,#35a3c4,#76f6e7); box-shadow: 0 0 15px #76f6e7; transition: width .3s; }
+    .board-wrap { position: relative; }
+    .board { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); gap: clamp(3px,.7vw,6px); padding: clamp(7px,1.2vw,12px); border: 1px solid #356477; background: #050f1d; box-shadow: inset 0 0 28px #000a; touch-action: none; user-select: none; }
+    .tile { position: relative; display: grid; place-items: center; aspect-ratio: 1; width: 100%; padding: 0; border: 1px solid #245168; background: linear-gradient(145deg,#102739,#081826); color: var(--glow); cursor: pointer; transition: opacity .2s,transform .2s,background .2s,box-shadow .2s; -webkit-tap-highlight-color: transparent; }
+    .tile::after { content: ""; position: absolute; inset: 3px; border-top: 1px solid #ffffff16; border-left: 1px solid #ffffff0a; pointer-events: none; }
+    .tile:hover { background: #183649; box-shadow: 0 0 13px #61e9e566; }
+    .tile:focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+    .tile.selected { background: #204758; box-shadow: inset 0 0 0 2px #86ffef,0 0 20px #74f8e79c; transform: scale(1.05); z-index: 1; }
+    .tile.hint { animation: hint 1s 2; }
+    .tile.powered { background: #184d59; box-shadow: inset 0 0 0 2px #a1fff4,0 0 22px #6fffe8; animation: pulse .25s infinite alternate; }
+    .tile.matched { opacity: 0; transform: scale(.2) rotate(12deg); }
+    .tile.invalid { animation: wiggle .26s; }
+    .tile.fresh .cat { animation: drop .24s backwards; }
+    .board.busy .tile { cursor: default; }
+    .cat { width: 82%; height: 82%; filter: drop-shadow(0 0 5px var(--glow)); }
+    .cat path,.cat circle { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: square; stroke-linejoin: miter; }
+    .cat .detail { stroke-width: 1.5; opacity: .7; }
+    .cat .eye { fill: currentColor; stroke: none; }
+    .cat-0 { --glow: #ff779e; } .cat-1 { --glow: #f4bd74; } .cat-2 { --glow: #60eed4; } .cat-3 { --glow: #ba91ff; } .cat-4 { --glow: #77baff; } .cat-5 { --glow: #fa9385; }
+    .burst { position: absolute; z-index: 2; max-width: 90%; white-space: nowrap; padding: 9px 12px; border: 1px solid currentColor; background: #081d2cee; color: #9afbef; box-shadow: 0 0 25px currentColor; font: bold clamp(12px,3vw,17px) Consolas,monospace; letter-spacing: .05em; pointer-events: none; animation: burst .85s ease-out forwards; }
+    .burst-8 { color: #83bbff; } .burst-12 { color: #d3a5ff; }
+    .toolbar { display: flex; gap: 8px; margin-top: 16px; }
+    .action { flex: 1; min-height: 44px; padding: 5px; border: 1px solid #3a7280; background: #0b2837; color: #a4e7e6; font-size: 11px; font-weight: bold; cursor: pointer; transition: background .15s,box-shadow .15s; }
+    .action:hover:not(:disabled) { background: #195062; box-shadow: 0 0 13px #59e9e55e; }
+    .action:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+    .action:disabled { opacity: .45; cursor: default; }
+    .action.primary { background: #65e8de; color: #061823; border-color: #81fff0; }
+    .action.primary:hover { background: #a2fff5; }
+    .guide { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 13px; margin-top: 15px; color: #8eaebc; font-size: 11px; text-align: center; }
+    .guide b { color: #84f4e8; }
+    .notice { min-height: 19px; margin: 13px 0 0; color: #a5d1dc; font-size: 11px; text-align: center; }
+    .overlay { position: absolute; z-index: 3; inset: 0; display: grid; place-items: center; background: #04101de8; backdrop-filter: blur(5px); padding: 16px; }
+    .overlay[hidden] { display: none; }
+    .result { width: min(100%,310px); padding: 30px 20px; border: 1px solid #67ecdf; background: #0c2535; box-shadow: 0 0 35px #5cefe343; text-align: center; }
+    .result-icon { font-size: 36px; color: #7ef8eb; }
+    .result h2 { margin: 12px 0; text-transform: uppercase; }
+    .result p { color: #abcad5; font-size: 14px; line-height: 1.5; }
+    .result .action { width: 100%; }
+    @keyframes hint { 50% { background: #215362; box-shadow: 0 0 20px #73f8eb; } }
+    @keyframes pulse { to { transform: scale(1.09); filter: brightness(1.4); } }
+    @keyframes wiggle { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    @keyframes drop { from { transform: translateY(-24px) scale(.55); opacity: 0; } }
+    @keyframes burst { 0% { opacity: 0; transform: translate(-50%,-30%) scale(.5); } 25% { opacity: 1; transform: translate(-50%,-80%) scale(1.1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-150%); } }
+    @media(max-width:790px) { .layout { max-width: 560px; grid-template-columns: 1fr; gap: 22px; } .intro { text-align: center; } .intro p { max-width: none; margin: auto; font-size: 14px; } h1 { font-size: clamp(44px,10vw,65px); margin: 15px 0 10px; } .instructions { display: none; } }
+    @media(max-width:390px) { .layout { width: calc(100% - 16px); } .panel { padding: 11px; } .stat { padding: 8px; } .stat small { font-size: 9px; } .action { font-size: 10px; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <section class="intro" aria-label="Правила игры">
+      <div class="tag">◈ SYSTEM // MATCH_03</div>
+      <h1>Коти<span>ки.</span></h1>
+      <p>Синхронизируй неоновых котиков. Собирай одинаковые сигналы в ряд и запускай цепные реакции.</p>
+      <div class="instructions"><strong>Управление // 01</strong>Нажми на двух соседних котиков или проведи пальцем. Три одинаковых в ряд создают комбинацию.</div>
+    </section>
+    <section class="panel" aria-label="Игра три в ряд">
+      <div class="header"><div class="heading">◈ КОТИКИ // GRID</div><div class="level">УРОВЕНЬ 01</div></div>
+      <div class="stats">
+        <div class="stat"><small>ОЧКИ</small><strong id="score">0</strong></div>
+        <div class="stat"><small>ЦЕЛЬ</small><strong>3000</strong></div>
+        <div class="stat"><small>ХОДЫ</small><strong id="moves">24</strong></div>
+      </div>
+      <div class="meter-label"><span>ЗАРЯД СИСТЕМЫ</span><span id="percent">0%</span></div>
+      <div class="meter" id="meter" role="progressbar" aria-label="Прогресс к цели" aria-valuemin="0" aria-valuemax="3000" aria-valuenow="0"><div class="meter-fill" id="meter-fill"></div></div>
+      <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="Поле 8 на 8"></div>
+        <div class="overlay" id="overlay" hidden>
+          <div class="result" role="dialog" aria-modal="true" aria-labelledby="result-title">
+            <div class="result-icon">◈</div><h2 id="result-title"></h2><p id="result-text"></p>
+            <button class="action primary" id="again">ИГРАТЬ СНОВА</button>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar"><button class="action" id="hint">✧ ПОДСКАЗКА</button><button class="action" id="shuffle">⤨ МИКС</button><button class="action primary" id="restart">↻ ЗАНОВО</button></div>
+      <div class="guide" aria-label="Бонусы"><span><b>5+</b> ВЗРЫВ 3×3</span><span><b>8+</b> ЛУЧИ</span><span><b>12+</b> ВСЁ ПОЛЕ</span></div>
+      <p class="notice" id="status" role="status" aria-live="polite">Собери трёх одинаковых котиков в ряд.</p>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const SIZE = 8, TYPES = 6, TARGET = 3000, START_MOVES = 24;
+      const names = ['розовый', 'янтарный', 'бирюзовый', 'фиолетовый', 'голубой', 'коралловый'];
+      const $ = id => document.getElementById(id);
+      const board = $('board'), wrap = document.querySelector('.board-wrap'), status = $('status');
+      const hint = $('hint'), shuffle = $('shuffle'), overlay = $('overlay');
+      const icon = '<svg class="cat" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 18V4l12 9h14L43 4v14l-3 17-8 7H16l-8-7z"/><path class="detail" d="M10 13l6 4M38 13l-6 4M8 31l9 2m-8 3 8-1m23-4-9 2m8 3-8-1M24 30v5m-4 0 4 2 4-2"/><path d="m21 29 3 2 3-2"/><circle class="eye" cx="17" cy="25" r="1.8"/><circle class="eye" cx="31" cy="25" r="1.8"/></svg>';
+      let cells = [], score = 0, moves = START_MOVES, selected = null, busy = false, ended = false, pointer = null, session = 0, hintTimer;
+      const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+      const row = i => Math.floor(i / SIZE);
+      const adjacent = (a,b) => Math.abs(row(a)-row(b)) + Math.abs(a%SIZE-b%SIZE) === 1;
+      const swap = (a,b) => { [cells[a],cells[b]] = [cells[b],cells[a]]; };
+      function matches() {
+        const found = new Set();
+        for (let r=0;r<SIZE;r++) for (let c=0;c<SIZE;) {
+          let end=c+1;
+          while(end<SIZE && cells[r*SIZE+c] != null && cells[r*SIZE+end]===cells[r*SIZE+c]) end++;
+          if(end-c>=3) for(let x=c;x<end;x++) found.add(r*SIZE+x);
+          c=end;
+        }
+        for (let c=0;c<SIZE;c++) for (let r=0;r<SIZE;) {
+          let end=r+1;
+          while(end<SIZE && cells[r*SIZE+c] != null && cells[end*SIZE+c]===cells[r*SIZE+c]) end++;
+          if(end-r>=3) for(let y=r;y<end;y++) found.add(y*SIZE+c);
+          r=end;
+        }
+        return found;
+      }
+      function groupsOf(matched) {
+        const seen=new Set(), groups=[];
+        for(const first of matched) {
+          if(seen.has(first)) continue;
+          const group=[], queue=[first]; seen.add(first);
+          for(const i of queue) {
+            group.push(i);
+            for(const j of [i-1,i+1,i-SIZE,i+SIZE]) if(matched.has(j) && !seen.has(j) && adjacent(i,j) && cells[i]===cells[j]) { seen.add(j); queue.push(j); }
+          }
+          if(group.length>=5) groups.push(group);
+        }
+        return groups;
+      }
+      function possibleMove() {
+        for(let i=0;i<cells.length;i++) for(const j of [i+1,i+SIZE]) {
+          if(j>=cells.length || !adjacent(i,j) || cells[i]===cells[j]) continue;
+          swap(i,j); const works=matches().size>0; swap(i,j);
+          if(works) return [i,j];
+        }
+        return null;
+      }
+      function makeBoard() {
+        do {
+          cells=[];
+          for(let i=0;i<SIZE*SIZE;i++) {
+            const forbidden=[];
+            if(i%SIZE>=2 && cells[i-1]===cells[i-2]) forbidden.push(cells[i-1]);
+            if(i>=SIZE*2 && cells[i-SIZE]===cells[i-SIZE*2]) forbidden.push(cells[i-SIZE]);
+            const choices=Array.from({length:TYPES},(_,n)=>n).filter(n=>!forbidden.includes(n));
+            cells.push(choices[Math.floor(Math.random()*choices.length)]);
+          }
+        } while(!possibleMove());
+      }
+      function stats() {
+        $('score').textContent=score.toLocaleString('ru-RU'); $('moves').textContent=moves;
+        const percent=Math.min(100,Math.round(score/TARGET*100));
+        $('percent').textContent=percent+'%'; $('meter-fill').style.width=percent+'%'; $('meter').setAttribute('aria-valuenow',Math.min(score,TARGET));
+      }
+      function render(fresh=[]) {
+        const newly=new Set(fresh);
+        board.innerHTML=cells.map((type,i)=>`<button type="button" class="tile cat-${type}${selected===i?' selected':''}${newly.has(i)?' fresh':''}" role="gridcell" data-index="${i}" aria-label="Строка ${row(i)+1}, столбец ${i%SIZE+1}: ${names[type]} котик" aria-selected="${selected===i}">${icon}</button>`).join('');
+        board.classList.toggle('busy',busy); hint.disabled=shuffle.disabled=busy||ended;
+      }
+      function clearHint() { clearTimeout(hintTimer); board.querySelectorAll('.hint').forEach(el=>el.classList.remove('hint')); }
+      function burst(center,label,tier) {
+        const tile=board.children[center], el=document.createElement('div');
+        el.className='burst burst-'+tier; el.textContent=label;
+        el.style.left=tile.offsetLeft+tile.offsetWidth/2+'px'; el.style.top=tile.offsetTop+tile.offsetHeight/2+'px';
+        wrap.append(el); setTimeout(()=>el.remove(),850);
+      }
+      function finish(win) {
+        ended=true; clearHint();
+        $('result-title').textContent=win?'ПОБЕДА':'ХОДЫ ЗАКОНЧИЛИСЬ';
+        $('result-text').textContent=`${score.toLocaleString('ru-RU')} очков. ${win?'Система синхронизирована!':'Попробуешь ещё раз?'}`;
+        overlay.hidden=false; render(); $('again').focus();
+      }
+      async function trySwap(a,b) {
+        if(busy||ended||!adjacent(a,b)) return;
+        const turn=session; busy=true; selected=null; clearHint(); swap(a,b); render();
+        await wait(170); if(turn!==session) return;
+        if(!matches().size) {
+          swap(a,b); render(); board.children[a].classList.add('invalid'); board.children[b].classList.add('invalid');
+          status.textContent='Ход не создаёт комбинацию.';
+          await wait(280); if(turn!==session) return;
+          busy=false; render(); return;
+        }
+        moves--;
+        let chain=0;
+        while(true) {
+          const matched=matches(); if(!matched.size) break;
+          chain++;
+          const cleared=new Set(matched), groups=groupsOf(matched);
+          let bonus=0, strongest=0;
+          for(const group of groups) {
+            const tier=group.length>=12?12:group.length>=8?8:5;
+            const center=chain===1&&group.includes(b)?b:group[Math.floor(group.length/2)];
+            strongest=Math.max(strongest,tier); bonus+=tier===12?1000:tier===8?500:200;
+            if(tier===12) for(let i=0;i<cells.length;i++) cleared.add(i);
+            else if(tier===8) for(let i=0;i<cells.length;i++) if(row(i)===row(center)||i%SIZE===center%SIZE) cleared.add(i);
+            else for(let r=Math.max(0,row(center)-1);r<=Math.min(SIZE-1,row(center)+1);r++) for(let c=Math.max(0,center%SIZE-1);c<=Math.min(SIZE-1,center%SIZE+1);c++) cleared.add(r*SIZE+c);
+            burst(center,tier===12?'ПОЛНАЯ ОЧИСТКА':tier===8?'ЛУЧЕВОЙ ИМПУЛЬС':'ЭНЕРГО-ВЗРЫВ',tier);
+          }
+          const points=(cleared.size*60+bonus)*chain; score+=points; stats();
+          status.textContent=`${strongest?'УСИЛЕНИЕ':chain>1?'КАСКАД':'КОМБИНАЦИЯ'}${chain>1?' ×'+chain:''} // +${points} очков`;
+          if(groups.length) {
+            cleared.forEach(i=>board.children[i].classList.add('powered'));
+            await wait(220); if(turn!==session) return;
+          }
+          cleared.forEach(i=>{ board.children[i].classList.remove('powered'); board.children[i].classList.add('matched'); });
+          await wait(250); if(turn!==session) return;
+          cleared.forEach(i=>{cells[i]=null;});
+          const fresh=[];
+          for(let c=0;c<SIZE;c++) {
+            const remaining=[];
+            for(let r=SIZE-1;r>=0;r--) if(cells[r*SIZE+c]!=null) remaining.push(cells[r*SIZE+c]);
+            for(let r=SIZE-1;r>=0;r--) {
+              const index=r*SIZE+c, fromBottom=SIZE-1-r;
+              cells[index]=fromBottom<remaining.length?remaining[fromBottom]:Math.floor(Math.random()*TYPES);
+              if(fromBottom>=remaining.length) fresh.push(index);
+            }
+          }
+          render(fresh); await wait(280); if(turn!==session) return;
+        }
+        if(score>=TARGET) finish(true);
+        else if(moves===0) finish(false);
+        else { if(!possibleMove()) { makeBoard(); status.textContent='Нет ходов // поле перенастроено.'; } busy=false; render(); }
+      }
+      function choose(i) {
+        if(busy||ended) return;
+        clearHint();
+        if(selected===null) selected=i;
+        else if(selected===i) selected=null;
+        else if(adjacent(selected,i)) { trySwap(selected,i); return; }
+        else selected=i;
+        render();
+      }
+      function start() {
+        session++; clearHint(); wrap.querySelectorAll('.burst').forEach(el=>el.remove());
+        score=0; moves=START_MOVES; selected=null; busy=false; ended=false; pointer=null; overlay.hidden=true;
+        status.textContent='Собери трёх одинаковых котиков в ряд.'; makeBoard(); stats(); render();
+      }
+      board.addEventListener('pointerdown',e=>{
+        const tile=e.target.closest('.tile'); if(!tile||busy||ended) return;
+        pointer={index:Number(tile.dataset.index),x:e.clientX,y:e.clientY,id:e.pointerId};
+        board.setPointerCapture(e.pointerId);
+      });
+      board.addEventListener('pointerup',e=>{
+        if(!pointer||pointer.id!==e.pointerId) return;
+        const {index,x,y}=pointer; pointer=null;
+        const dx=e.clientX-x, dy=e.clientY-y;
+        if(Math.max(Math.abs(dx),Math.abs(dy))<20) { choose(index); return; }
+        const next=Math.abs(dx)>Math.abs(dy)?index+(dx>0?1:-1):index+(dy>0?SIZE:-SIZE);
+        if(next>=0&&next<cells.length&&adjacent(index,next)) trySwap(index,next);
+      });
+      board.addEventListener('pointercancel',()=>{pointer=null;});
+      board.addEventListener('keydown',e=>{
+        const tile=e.target.closest('.tile'); if(!tile||busy||ended) return;
+        const i=Number(tile.dataset.index), offsets={ArrowUp:-SIZE,ArrowDown:SIZE,ArrowLeft:-1,ArrowRight:1};
+        if(Object.prototype.hasOwnProperty.call(offsets,e.key)) {
+          e.preventDefault(); const next=i+offsets[e.key];
+          if(next>=0&&next<cells.length&&adjacent(i,next)) board.children[next].focus();
+        } else if(e.key==='Enter'||e.key===' ') { e.preventDefault(); choose(i); board.children[i].focus(); }
+        else if(e.key==='Escape') { selected=null; render(); board.children[i].focus(); }
+      });
+      hint.addEventListener('click',()=>{
+        if(busy||ended) return; clearHint();
+        const move=possibleMove(); if(!move) return;
+        move.forEach(i=>board.children[i].classList.add('hint'));
+        status.textContent='Подсвеченные котики создают комбинацию.'; hintTimer=setTimeout(clearHint,2200);
+      });
+      shuffle.addEventListener('click',()=>{ if(busy||ended) return; clearHint(); selected=null; makeBoard(); render(); status.textContent='Поле перенастроено.'; });
+      $('restart').addEventListener('click',start); $('again').addEventListener('click',start);
+      start();
+    })();
+  </script>
+</body>
+</html>

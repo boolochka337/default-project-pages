@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Слайдовая — редактор презентаций</title>
+  <meta name="description" content="Создавайте и редактируйте презентации по своему запросу, сохраняйте в формате PPTX">
+  <style>
+    :root { font-family: Inter, "Segoe UI", Arial, sans-serif; color: #17182a; background: #f6f5fa; --violet: #6643ef; --dark: #191827; --line: #e8e6ef; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a78bfa; outline-offset: 2px; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 244px minmax(0, 1fr); }
+    .sidebar { display: flex; flex-direction: column; gap: 22px; padding: 26px 18px; background: var(--dark); color: white; }
+    .logo { display: flex; align-items: center; gap: 11px; padding: 0 9px; font-size: 19px; font-weight: 800; letter-spacing: -.05em; }
+    .logo-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: #9c84ff; color: #1a1635; font-size: 23px; }
+    .sidebar-label { margin: 14px 9px 3px; color: #9290a6; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .side-link { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 13px; border: 0; border-radius: 11px; background: transparent; color: #c4c1d2; text-align: left; font-size: 13px; font-weight: 650; }
+    .side-link:hover, .side-link.current { background: #302c46; color: white; }
+    .side-link span:first-child { width: 20px; text-align: center; font-size: 17px; }
+    .sidebar-bottom { margin-top: auto; padding: 16px; border: 1px solid #484358; border-radius: 14px; background: #252336; }
+    .sidebar-bottom b { display: block; margin-bottom: 7px; font-size: 12px; }
+    .sidebar-bottom p { margin: 0; color: #aca9bd; font-size: 11px; line-height: 1.5; }
+    .side-home { display: block; margin: 0 9px; color: #b4a5ff; font-size: 11px; text-decoration: none; }
+    .side-home:hover { text-decoration: underline; }
+    .main { min-width: 0; }
+    .topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px clamp(20px, 4vw, 52px); border-bottom: 1px solid var(--line); background: white; }
+    .crumb { color: #858397; font-size: 12px; font-weight: 650; }
+    .crumb strong { color: #252339; }
+    .top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+    .saved { margin-right: 10px; color: #747289; font-size: 11px; }
+    .btn { min-height: 39px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 15px; border: 1px solid var(--line); border-radius: 9px; background: white; color: #2b2940; font-size: 12px; font-weight: 750; white-space: nowrap; }
+    .btn:hover { border-color: #baaef8; background: #f7f4ff; }
+    .btn.primary { border-color: var(--violet); background: var(--violet); color: white; }
+    .btn.primary:hover { background: #5532d8; }
+    .btn.danger { color: #ae3f53; }
+    .workspace { max-width: 1590px; margin: auto; padding: 36px clamp(20px, 4vw, 52px) 55px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
+    .eyebrow { margin: 0 0 10px; color: var(--violet); font-size: 10px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { margin: 0 0 8px; font-size: clamp(26px, 3vw, 38px); line-height: 1.16; letter-spacing: -.055em; }
+    .muted { margin: 0; color: #77758a; font-size: 13px; line-height: 1.55; }
+    .create { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 18px; padding: 22px; border: 1px solid #e5e1f4; border-radius: 19px; background: #fff; box-shadow: 0 13px 32px #2924470b; }
+    label { display: block; margin-bottom: 8px; color: #39374a; font-size: 11px; font-weight: 800; }
+    .prompt { width: 100%; min-height: 111px; padding: 13px 15px; resize: vertical; border: 1px solid var(--line); border-radius: 11px; background: #fbfbfe; color: #222137; font-size: 13px; line-height: 1.6; }
+    .prompt::placeholder, input::placeholder, textarea::placeholder { color: #a29fb3; }
+    .prompt:focus, .field:focus { border-color: #9f8dff; outline: 2px solid #e8e1ff; }
+    .hint { margin: 9px 0 0; color: #888698; font-size: 11px; line-height: 1.5; }
+    .settings { display: flex; flex-direction: column; gap: 11px; padding-left: 20px; border-left: 1px solid var(--line); }
+    .field { width: 100%; min-height: 39px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: #242238; font-size: 12px; }
+    .settings .btn { margin-top: auto; }
+    .bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 35px 0 17px; }
+    h2 { margin: 0; font-size: 18px; letter-spacing: -.025em; }
+    .bar-sub { margin-left: 9px; color: #9391a1; font-size: 12px; }
+    .editor { display: grid; grid-template-columns: 172px minmax(0, 1fr) 295px; gap: 18px; align-items: start; }
+    .slides-list { display: grid; gap: 11px; max-height: 680px; overflow-y: auto; padding: 2px 6px 12px 2px; }
+    .slide-choice { display: block; width: 100%; padding: 7px; border: 2px solid transparent; border-radius: 11px; background: transparent; text-align: left; }
+    .slide-choice:hover { background: white; }
+    .slide-choice.active { border-color: var(--violet); background: white; }
+    .mini { position: relative; aspect-ratio: 16 / 9; overflow: hidden; padding: 12px; border-radius: 5px; background: var(--mini-bg, #191b39); color: var(--mini-fg, #fff); box-shadow: 0 4px 13px #16132b1b; }
+    .mini::after { content: ""; position: absolute; right: -12%; bottom: -40%; width: 58%; aspect-ratio: 1; border: 16px solid var(--mini-accent, #9d83ff); border-radius: 50%; opacity: .45; }
+    .mini b { position: relative; z-index: 1; display: block; max-width: 90%; overflow: hidden; font-size: 8px; line-height: 1.35; text-overflow: ellipsis; }
+    .slide-choice small { display: block; margin: 7px 2px 0; overflow: hidden; color: #676579; font-size: 10px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+    .canvas-wrap { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 17px; background: white; }
+    .canvas { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 10px; background: var(--slide-bg); color: var(--slide-fg); box-shadow: 0 15px 40px #26224024; }
+    .canvas::before { content: ""; position: absolute; right: -12%; bottom: -48%; width: 64%; aspect-ratio: 1; border: clamp(22px, 5vw, 65px) solid var(--slide-accent); border-radius: 50%; opacity: .36; }
+    .canvas::after { content: ""; position: absolute; top: 8%; right: 7%; width: 13%; height: 3px; background: var(--slide-accent); opacity: .9; }
+    .canvas-inner { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: center; height: 100%; width: 78%; padding: 8% 9%; }
+    .canvas.cover .canvas-inner { width: 88%; }
+    .canvas.split .canvas-inner, .canvas.image .canvas-inner { width: 57%; }
+    .canvas .kicker { margin: 0 0 5%; color: var(--slide-accent); font-size: clamp(8px, 1vw, 13px); font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+    .canvas h3 { max-height: 56%; overflow: hidden; margin: 0 0 5%; font-size: clamp(18px, 2.6vw, 40px); line-height: 1.15; letter-spacing: -.045em; overflow-wrap: anywhere; }
+    .canvas.cover h3 { font-size: clamp(25px, 3.4vw, 52px); }
+    .canvas .slide-body { max-height: 50%; overflow: hidden; margin: 0; color: var(--slide-sub); font-size: clamp(9px, 1.15vw, 16px); line-height: 1.65; white-space: pre-line; overflow-wrap: anywhere; }
+    .canvas .slide-body.bullets { padding-left: 18px; white-space: normal; }
+    .canvas .slide-body.bullets li { margin: 0 0 7px; }
+    .canvas .slide-number { position: absolute; right: 7%; bottom: 6%; font-size: 11px; font-weight: 750; opacity: .7; }
+    .canvas .side-image { position: absolute; z-index: 1; inset: 18% 7% 17% 60%; width: 33%; height: 65%; object-fit: cover; border-radius: 9px; }
+    .canvas .side-block { position: absolute; z-index: 1; inset: 19% 8% 20% 63%; display: grid; place-items: center; border-radius: 10px; background: var(--slide-accent); color: var(--slide-bg); font-size: clamp(28px, 5vw, 73px); font-weight: 850; }
+    .canvas-footer { display: flex; justify-content: space-between; gap: 12px; padding-top: 15px; color: #8a8899; font-size: 11px; }
+    .edit-panel { padding: 20px; border: 1px solid var(--line); border-radius: 17px; background: white; }
+    .edit-panel h3 { margin: 0 0 19px; font-size: 15px; }
+    .edit-panel label { margin-top: 15px; }
+    .edit-panel label:first-of-type { margin-top: 0; }
+    .edit-panel textarea { min-height: 120px; line-height: 1.5; resize: vertical; }
+    .edit-panel .small-hint { margin: 7px 0 0; color: #9290a1; font-size: 10px; line-height: 1.45; }
+    .edit-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 17px; }
+    .edit-actions .btn { padding-inline: 7px; font-size: 10px; }
+    .upload { display: block; margin: 12px 0 0 !important; padding: 10px; border: 1px dashed #bcb2ec; border-radius: 9px; color: var(--violet); text-align: center; cursor: pointer; }
+    .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .status { min-height: 20px; margin: 12px 0 0; color: #625c81; font-size: 11px; }
+    .library { margin-top: 20px; padding: 22px; border: 1px solid var(--line); border-radius: 19px; background: white; }
+    .library-head { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
+    .library h2 { margin-bottom: 6px; }
+    .library-upload { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 15px; border-radius: 9px; background: #eeeaff; color: #5130c5; font-size: 12px; font-weight: 750; cursor: pointer; }
+    .library-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .library-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 10px; margin-top: 17px; }
+    .library-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 12px; border: 1px solid var(--line); border-radius: 11px; font-size: 12px; }
+    .library-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .library-item button { border: 0; background: transparent; color: #ae3f53; font-size: 19px; }
+    .library-note { margin: 11px 0 0; color: #77758a; font-size: 11px; }
+    .source-options { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-top: 13px; font-size: 12px; }
+    .source-options label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 11px; }
+    .source-results { margin-top: 10px; font-size: 11px; line-height: 1.7; }
+    .source-results a { color: #5130c5; }
+    .source-results a:hover { text-decoration: underline; }
+    .template-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-top: 16px; }
+    .template-tools .field { width: min(100%, 260px); }
+    .template-tools label { margin: 0; }
+    .template-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; margin-top: 16px; }
+    .template-card { padding: 15px; border: 1px solid var(--line); border-radius: 12px; }
+    .template-card strong { display: block; overflow-wrap: anywhere; font-size: 13px; }
+    .template-card small { display: block; margin: 7px 0 13px; color: #77758a; }
+    .template-card-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    @media (max-width: 1220px) { .editor { grid-template-columns: 145px minmax(0, 1fr); } .edit-panel { grid-column: 2; } }
+    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .topbar { padding-inline: 20px; } .workspace { padding-inline: 20px; } .create { grid-template-columns: 1fr; } .settings { display: grid; grid-template-columns: 1fr 1fr; border-left: 0; border-top: 1px solid var(--line); padding: 16px 0 0; } .settings .btn { grid-column: 1 / -1; } }
+    @media (max-width: 560px) { .topbar { align-items: flex-start; flex-direction: column; } .saved { display: none; } .intro { align-items: start; flex-direction: column; } .settings { grid-template-columns: 1fr; } .editor { grid-template-columns: 1fr; } .slides-list { display: flex; max-height: none; overflow-x: auto; } .slide-choice { min-width: 118px; max-width: 118px; } .edit-panel { grid-column: auto; } .canvas-wrap { padding: 9px; } .canvas-inner { padding: 8%; } .canvas .slide-body { font-size: 9px; } .canvas .kicker { font-size: 7px; } .bar-sub { display: block; margin: 5px 0 0; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo"><span class="logo-icon">▧</span> Слайдовая<span style="color:#9c84ff">.</span></div>
+      <div><p class="sidebar-label">Рабочее пространство</p><button class="side-link current" type="button"><span>▦</span> Мои презентации</button><button class="side-link" id="new-project" type="button"><span>＋</span> Новая презентация</button><button class="side-link" id="import-project" type="button"><span>↥</span> Открыть проект</button><a class="side-link" href="#templates"><span>▧</span> Мои шаблоны</a><a class="side-link" href="#library"><span>▤</span> Библиотека материалов</a></div>
+      <div class="sidebar-bottom"><b>Ваши материалы</b><p>Загруженные отчёты и презентации хранятся локально. Интернет-поиск работает при запуске локального сервера.</p></div>
+      <a class="side-home" href="index.html">← Сайт департамента</a>
+    </aside>
+    <div class="main">
+      <header class="topbar"><div class="crumb">Рабочее пространство / <strong>Редактор презентации</strong></div><div class="top-actions"><span class="saved" id="saved">Сохранено автоматически</span><button class="btn" id="open-project" type="button">↥ Открыть</button><button class="btn" id="save-project" type="button">↓ Сохранить проект</button><button class="btn primary" id="export-pptx" type="button">↗ Скачать PPTX</button></div></header>
+      <main class="workspace">
+        <div class="intro"><div><p class="eyebrow">Конструктор презентаций</p><h1>От идеи до готовых слайдов</h1><p class="muted">Опишите тему — и соберите презентацию, которую можно отредактировать здесь или в PowerPoint.</p></div></div>
+        <section class="create" aria-label="Создание презентации">
+          <div><label for="prompt">О чём должна быть презентация?</label><textarea class="prompt" id="prompt" placeholder="Например: Добровольческие проекты университета. Найди актуальную информацию и используй мои загруженные отчёты."></textarea><p class="hint">В режиме с источниками платформа ищет страницы в интернете и цитирует загруженные материалы. Проверьте факты перед публикацией.</p><div class="source-options"><label><input type="checkbox" id="web-search" checked> Искать в интернете</label><label><input type="checkbox" id="use-library" checked> Использовать выбранные материалы</label></div></div>
+          <div class="settings"><div><label for="count">Количество слайдов</label><select class="field" id="count"><option>5</option><option selected>7</option><option>9</option><option>12</option></select></div><div><label for="theme">Оформление</label><select class="field" id="theme"><option value="night">Сумерки · фиолетовый</option><option value="light">Минимализм · светлый</option><option value="forest">Эко · зелёный</option><option value="sunset">Тепло · оранжевый</option></select></div><div><label for="generation-template">Шаблон для новых слайдов</label><select class="field" id="generation-template"><option value="">Без шаблона</option></select></div><button class="btn primary" id="generate" type="button">✦ Найти и создать</button><p class="hint" id="generation-status" role="status" aria-live="polite"></p></div>
+        </section>
+        <section class="library" id="library" aria-label="Библиотека материалов"><div class="library-head"><div><h2>Библиотека материалов</h2><p class="muted">Загрузите отчёты и презентации, чтобы использовать их при создании новых слайдов.</p></div><label class="library-upload" for="library-files">＋ Добавить файлы<input id="library-files" type="file" accept=".txt,.md,.docx,.pptx,.pdf" multiple></label></div><div class="library-list" id="library-list"></div><p class="library-note" id="library-status" role="status">Для поиска и библиотеки запустите presentation_server.py и откройте страницу через http://127.0.0.1:8766/.</p><div class="source-results" id="source-results"></div></section>
+        <section class="library" id="templates" aria-label="Мои шаблоны"><div class="library-head"><div><h2>Мои шаблоны</h2><p class="muted">Сохраните текущую презентацию как шаблон оформления и макетов. Шаблоны хранятся в этом браузере.</p></div></div><div class="template-tools"><div><label for="template-name">Название шаблона</label><input class="field" id="template-name" maxlength="80" placeholder="Например, отчёт департамента"></div><button class="btn" id="save-template" type="button">＋ Сохранить текущий</button><button class="btn" id="import-template" type="button">↥ Добавить из JSON</button></div><div class="template-list" id="template-list"></div><p class="library-note" id="template-status" role="status" aria-live="polite">Можно также импортировать ранее сохранённый проект Слайдовой в формате JSON.</p></section>
+        <div class="bar"><div><h2>Редактор слайдов <span class="bar-sub" id="slide-total"></span></h2></div><div class="top-actions"><button class="btn" id="add-slide" type="button">＋ Добавить слайд</button><button class="btn" id="move-left" type="button" aria-label="Переместить слайд назад">←</button><button class="btn" id="move-right" type="button" aria-label="Переместить слайд вперёд">→</button></div></div>
+        <section class="editor" aria-label="Редактор слайдов">
+          <div class="slides-list" id="slides-list" aria-label="Список слайдов"></div>
+          <div class="canvas-wrap"><div class="canvas" id="canvas" aria-label="Предпросмотр слайда"></div><div class="canvas-footer"><span id="slide-position"></span><span>Формат 16:9 · редактируемый PPTX</span></div></div>
+          <div class="edit-panel"><h3>Содержимое слайда</h3><label for="slide-type">Макет</label><select class="field" id="slide-type"><option value="cover">Титульный</option><option value="content">Текстовый</option><option value="bullets">Список</option><option value="split">Акцентный</option><option value="image">С изображением</option></select><label for="slide-kicker">Надпись сверху</label><input class="field" id="slide-kicker" placeholder="Раздел / тема"><label for="slide-title">Заголовок</label><input class="field" id="slide-title" placeholder="Название слайда"><label for="slide-body">Текст / тезисы</label><textarea class="field" id="slide-body" placeholder="Каждый пункт списка — с новой строки"></textarea><p class="small-hint">В макете «Список» каждая новая строка станет отдельным пунктом.</p><label class="upload" for="slide-image">＋ Добавить изображение<input id="slide-image" type="file" accept="image/png,image/jpeg"></label><p class="small-hint" id="image-info">PNG или JPEG. Изображение сохранится вместе с проектом и PPTX.</p><div class="edit-actions"><button class="btn" id="duplicate-slide" type="button">⧉ Дублировать</button><button class="btn danger" id="delete-slide" type="button">× Удалить</button></div><p class="status" id="status" role="status" aria-live="polite"></p></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <input id="project-file" type="file" accept="application/json,.json" hidden>
+  <input id="template-file" type="file" accept="application/json,.json" hidden>
+  <script>
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const THEMES = {
+      night: { bg: '191B39', fg: 'FFFFFF', sub: 'DBD8EB', accent: 'BCA7FF' },
+      light: { bg: 'FAF8F3', fg: '20243B', sub: '575A6C', accent: '6744E8' },
+      forest: { bg: '153C33', fg: 'FFFFFF', sub: 'D1E4D9', accent: 'DCE969' },
+      sunset: { bg: '432D36', fg: 'FFFFFF', sub: 'F1DDE0', accent: 'FFB77A' }
+    };
+    const STORAGE = 'slide-studio-project-v1';
+    const freshSlide = (type = 'content', title = 'Новый слайд', body = '') => ({ type, kicker: '', title, body, image: null });
+    const example = { title: 'Молодёжные инициативы', theme: 'night', slides: [
+      { type: 'cover', kicker: 'ПРЕЗЕНТАЦИЯ', title: 'Идеи, которые меняют мир', body: 'Молодёжные инициативы и проекты университета', image: null },
+      { type: 'content', kicker: '01 / КОНТЕКСТ', title: 'Почему это важно', body: 'У молодых людей есть идеи и энергия для перемен. Наша задача — создать условия, в которых эти идеи смогут стать реальностью.', image: null },
+      { type: 'bullets', kicker: '02 / НАПРАВЛЕНИЯ', title: 'С чего начать', body: 'Найти единомышленников\nСформулировать цель и результат\nПодготовить план проекта\nПредставить идею и получить поддержку', image: null },
+      { type: 'split', kicker: '03 / ДЕЙСТВИЕ', title: 'Следующий шаг — за нами', body: 'Начните с небольшого проекта и расскажите о нём другим. Большие перемены начинаются с конкретного действия.', image: null }
+    ] };
+    let project;
+    try { const saved = JSON.parse(localStorage.getItem(STORAGE)); project = validate(saved) ? saved : structuredClone(example); }
+    catch { project = structuredClone(example); }
+    let selected = 0;
+    function validate(value) { return value && typeof value.title === 'string' && THEMES[value.theme] && Array.isArray(value.slides) && value.slides.length > 0 && value.slides.every(s => s && typeof s.title === 'string' && typeof s.body === 'string' && typeof s.kicker === 'string' && ['cover','content','bullets','split','image'].includes(s.type)); }
+    function themeStyle(t) { return `--slide-bg:#${t.bg};--slide-fg:#${t.fg};--slide-sub:#${t.sub};--slide-accent:#${t.accent}`; }
+    function status(text) { $('status').textContent = text; }
+    function persist() { try { localStorage.setItem(STORAGE, JSON.stringify(project)); $('saved').textContent = 'Сохранено автоматически'; } catch { $('saved').textContent = 'Место в браузере заполнено — сохраните проект'; } }
+    function element(tag, className, text) { const e = document.createElement(tag); if (className) e.className = className; if (text !== undefined) e.textContent = text; return e; }
+    function renderList() {
+      $('slides-list').replaceChildren();
+      project.slides.forEach((slide, index) => {
+        const choice = element('button', 'slide-choice' + (selected === index ? ' active' : ''));
+        choice.type = 'button'; choice.setAttribute('aria-label', `Слайд ${index + 1}: ${slide.title}`); choice.setAttribute('aria-pressed', String(selected === index));
+        const mini = element('div', 'mini');
+        const t = THEMES[project.theme]; mini.style.cssText = `--mini-bg:#${t.bg};--mini-fg:#${t.fg};--mini-accent:#${t.accent}`;
+        mini.append(element('b', '', slide.title || 'Без заголовка'));
+        choice.append(mini, element('small', '', `${String(index + 1).padStart(2, '0')}  ${slide.title || 'Без заголовка'}`));
+        choice.addEventListener('click', () => { selected = index; render(); });
+        $('slides-list').append(choice);
+      });
+    }
+    function renderCanvas() {
+      const slide = project.slides[selected], t = THEMES[project.theme], canvas = $('canvas');
+      canvas.className = `canvas ${slide.type}`; canvas.style.cssText = themeStyle(t); canvas.replaceChildren();
+      const inner = element('div', 'canvas-inner');
+      inner.append(element('p', 'kicker', slide.kicker || 'ПРЕЗЕНТАЦИЯ'));
+      inner.append(element('h3', '', slide.title || 'Без заголовка'));
+      if (slide.type === 'bullets') {
+        const list = element('ul', 'slide-body bullets');
+        slide.body.split('\n').filter(Boolean).forEach(line => list.append(element('li', '', line)));
+        inner.append(list);
+      } else inner.append(element('p', 'slide-body', slide.body));
+      canvas.append(inner);
+      if (slide.image && /^data:image\/(png|jpeg);base64,/.test(slide.image)) {
+        const img = element('img', 'side-image'); img.src = slide.image; img.alt = 'Изображение слайда'; canvas.append(img);
+      } else if (slide.type === 'split' || slide.type === 'image') canvas.append(element('div', 'side-block', '✦'));
+      canvas.append(element('span', 'slide-number', String(selected + 1).padStart(2, '0')));
+      $('slide-position').textContent = `Слайд ${selected + 1} из ${project.slides.length}`;
+      $('slide-total').textContent = `${project.slides.length} слайдов`;
+      $('image-info').textContent = slide.image ? 'Изображение добавлено. Выберите новый файл, чтобы заменить его.' : 'PNG или JPEG. Изображение сохранится вместе с проектом и PPTX.';
+    }
+     function renderFields() { const s = project.slides[selected]; $('slide-type').value = s.type; $('slide-kicker').value = s.kicker; $('slide-title').value = s.title; $('slide-body').value = s.body; $('theme').value = project.theme; }
+     function render() { renderList(); renderCanvas(); renderFields(); persist(); }
+     const TEMPLATE_STORAGE = 'slide-studio-templates-v1';
+     function templateStatus(text) { $('template-status').textContent = text; }
+     function validTemplate(value) {
+       return value && value.kind === 'slide-studio-template' && value.version === 1 && typeof value.name === 'string' && value.name.trim().length > 0 && value.name.length <= 80 && validate(value.project) && value.project.slides.length <= 50 && value.project.slides.every(s => s.title.length <= 500 && s.body.length <= 5000 && s.kicker.length <= 200 && (!s.image || typeof s.image === 'string' && s.image.length <= 6_000_000 && /^data:image\/(png|jpeg);base64,/.test(s.image)));
+     }
+     let templates = [];
+     try { const stored = JSON.parse(localStorage.getItem(TEMPLATE_STORAGE) || '[]'); if (Array.isArray(stored)) templates = stored.filter(validTemplate).map(t => ({...t, id: typeof t.id === 'string' ? t.id : ''})); }
+     catch { /* Damaged local storage: the editor remains available. */ }
+     function renderTemplates() {
+       const select = $('generation-template'), chosen = select.value;
+       select.replaceChildren(element('option', '', 'Без шаблона'));
+       select.firstChild.value = '';
+       const list = $('template-list'); list.replaceChildren();
+       templates.forEach(template => {
+         const option = element('option', '', template.name); option.value = template.id; select.append(option);
+         const card = element('div', 'template-card');
+         card.append(element('strong', '', template.name), element('small', '', `${template.project.slides.length} слайдов · ${$('theme').querySelector(`option[value="${template.project.theme}"]`).textContent}`));
+         const actions = element('div', 'template-card-actions');
+         const apply = element('button', 'btn', 'Применить'); apply.type = 'button';
+         apply.addEventListener('click', () => {
+           if (!confirm(`Заменить текущую презентацию шаблоном «${template.name}»? Сохраните проект, если нужно оставить текущие слайды.`)) return;
+           project = structuredClone(template.project); selected = 0; render(); templateStatus(`Шаблон «${template.name}» применён. Слайды можно редактировать.`);
+         });
+         const exportButton = element('button', 'btn', '↓ JSON'); exportButton.type = 'button';
+         exportButton.addEventListener('click', () => { download(new Blob([JSON.stringify({...template, id: undefined}, null, 2)], {type:'application/json'}), (template.name.replace(/[\\/:*?"<>|]/g, '').slice(0, 70) || 'Шаблон') + '.json'); templateStatus('Шаблон скачан в JSON.'); });
+         const remove = element('button', 'btn danger', 'Удалить'); remove.type = 'button';
+         remove.addEventListener('click', () => { if (!confirm(`Удалить шаблон «${template.name}»?`)) return; const old = templates; templates = templates.filter(t => t.id !== template.id); try { localStorage.setItem(TEMPLATE_STORAGE, JSON.stringify(templates)); renderTemplates(); templateStatus('Шаблон удалён.'); } catch { templates = old; templateStatus('Не удалось удалить шаблон из хранилища браузера.'); } });
+         actions.append(apply, exportButton, remove); card.append(actions); list.append(card);
+       });
+       select.value = templates.some(t => t.id === chosen) ? chosen : '';
+     }
+     function addTemplate(name, source) {
+       const template = {kind: 'slide-studio-template', version: 1, id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, name: name.trim().slice(0, 80), project: {title: source.title, theme: source.theme, slides: structuredClone(source.slides)}};
+       if (!validTemplate(template) || JSON.stringify(template).length > 8_000_000) throw Error('Слишком большой или некорректный шаблон. Уменьшите изображения или количество слайдов.');
+       const updated = [...templates, template];
+       localStorage.setItem(TEMPLATE_STORAGE, JSON.stringify(updated));
+       templates = updated; renderTemplates(); $('generation-template').value = template.id;
+       templateStatus(`Шаблон «${template.name}» добавлен. Теперь его можно выбрать для новых слайдов.`);
+     }
+     $('save-template').addEventListener('click', () => {
+       const name = $('template-name').value.trim();
+       if (!name) { $('template-name').focus(); templateStatus('Введите название шаблона.'); return; }
+       try { addTemplate(name, project); $('template-name').value = ''; } catch (err) { templateStatus(err.message === 'The quota has been exceeded.' ? 'В браузере недостаточно места. Уменьшите изображения или скачайте шаблоны в JSON.' : `Не удалось сохранить шаблон: ${err.message}`); }
+     });
+     $('import-template').addEventListener('click', () => $('template-file').click());
+     $('template-file').addEventListener('change', async e => {
+       const file = e.target.files[0]; e.target.value = ''; if (!file) return;
+       if (file.size > 8_000_000) { templateStatus('Файл шаблона должен быть меньше 8 МБ.'); return; }
+       try {
+         const data = JSON.parse(await file.text());
+         if (validTemplate(data)) addTemplate(data.name, data.project);
+         else if (validate(data)) addTemplate(file.name.replace(/\.json$/i, '').slice(0, 80), data);
+         else throw Error('Нужен JSON-шаблон или проект, сохранённый в Слайдовой.');
+       } catch (err) { templateStatus(`Не удалось добавить шаблон: ${err.message}`); }
+     });
+     $('generation-template').addEventListener('change', e => { const template = templates.find(t => t.id === e.target.value); if (template) $('theme').value = template.project.theme; });
+     renderTemplates();
+     function useTemplateSlides(slides, template) {
+       if (!template) return slides;
+       const patterns = template.project.slides;
+       return slides.map((slide, index) => {
+         const pattern = index === 0 ? patterns[0] : index === slides.length - 1 ? patterns[patterns.length - 1] : patterns.length > 2 ? patterns[1 + (index - 1) % (patterns.length - 2)] : patterns[1] || null;
+         if (!pattern) return slide;
+         return {...slide, type: index === slides.length - 1 ? 'bullets' : pattern.type, image: pattern.image || null};
+       });
+     }
+     function draftSlides(prompt, count) {
+       const lines = prompt.split(/\n+/).map(line => line.trim().replace(/^[-•\d.)\s]+/, '')).filter(Boolean);
+       const title = (lines[0] || 'Новая презентация').slice(0, 95);
+       const sections = ['Контекст и цель', 'Ключевые вопросы', 'Основные направления', 'Данные и примеры', 'Практические шаги', 'Ожидаемые результаты', 'Выводы'];
+       const slides = [{type: 'cover', kicker: 'ЧЕРНОВИК БЕЗ ИСТОЧНИКОВ', title, body: 'Добавьте проверенные факты и ссылки перед публикацией.', image: null}];
+       for (let index = 1; index < count - 1; index++) {
+         const point = lines[index];
+         slides.push({type: 'content', kicker: `${String(index).padStart(2, '0')} / ЧЕРНОВИК`, title: sections[(index - 1) % sections.length], body: point || 'Добавьте подтверждённые сведения, примеры и ссылки на источники.', image: null});
+       }
+       slides.push({type: 'bullets', kicker: 'ПЕРЕД ПУБЛИКАЦИЕЙ', title: 'Проверка материалов', body: 'Добавить достоверные источники\nПроверить цифры, даты и формулировки\nОтредактировать итоговые выводы', image: null});
+       return {title, slides, sources: []};
+     }
+     function generationStatus(text) { $('generation-status').textContent = text; status(text); }
+     async function api(path, options) {
+       let response;
+       try { response = await fetch(path, options); }
+       catch { const error = Error('Сервер Слайдовой недоступен.'); error.offline = true; throw error; }
+       if (response.status === 404 || !response.headers.get('content-type')?.includes('application/json')) {
+         const error = Error('Открыт другой сервер, не сервер Слайдовой.'); error.offline = true; throw error;
+       }
+       const data = await response.json();
+       if (!response.ok) throw Error(data.error || 'Не удалось выполнить запрос');
+       return data;
+     }
+     function libraryStatus(text) { $('library-status').textContent = text; }
+     async function loadLibrary() {
+       try {
+         const {documents} = await api('/api/library');
+         const list = $('library-list'); list.replaceChildren();
+         documents.forEach(doc => {
+           const item = element('div', 'library-item');
+           const select = element('input'); select.type = 'checkbox'; select.value = doc.id; select.checked = true; select.className = 'library-select'; select.setAttribute('aria-label', `Использовать ${doc.name}`);
+           const name = element('span', '', `${doc.name} · ${Math.round(doc.length / 1000)} тыс. знаков`); name.title = doc.name;
+           const remove = element('button', '', '×'); remove.type = 'button'; remove.title = `Удалить ${doc.name}`; remove.setAttribute('aria-label', remove.title);
+           remove.addEventListener('click', async () => { if (!confirm(`Удалить «${doc.name}» из библиотеки?`)) return; try { await api(`/api/library/${doc.id}`, {method: 'DELETE'}); await loadLibrary(); } catch (err) { libraryStatus(err.message); } });
+           item.append(select, name, remove); list.append(item);
+         });
+         libraryStatus(documents.length ? `В библиотеке ${documents.length} файлов. Отметьте материалы для новой презентации.` : 'Библиотека пуста. Загрузите материалы или включите поиск в интернете.');
+       } catch { libraryStatus('Для поиска и библиотеки запустите python presentation_server.py и откройте http://127.0.0.1:8766/. Без сервера доступен только локальный черновик.'); }
+     }
+     $('library-files').addEventListener('change', async e => {
+       for (const file of e.target.files) {
+         if (file.size > 10 * 1024 * 1024) { libraryStatus(`${file.name}: максимальный размер — 10 МБ.`); continue; }
+         try {
+           libraryStatus(`Загрузка: ${file.name}…`);
+           const data = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+           await api('/api/library', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name: file.name, data})});
+           await loadLibrary();
+         } catch (err) { libraryStatus(`${file.name}: ${err.message}`); }
+       }
+       e.target.value = '';
+     });
+     $('generate').addEventListener('click', async () => {
+       const prompt = $('prompt').value.trim();
+       if (!prompt) { $('prompt').focus(); generationStatus('Сначала напишите тему или короткий запрос.'); return; }
+       const ids = $('use-library').checked ? [...document.querySelectorAll('.library-select:checked')].map(input => input.value) : [];
+       const button = $('generate'); button.disabled = true; generationStatus('Создаём слайды…');
+       try {
+         let result, draft = false;
+         if (!ids.length && !$('web-search').checked) { result = draftSlides(prompt, Number($('count').value)); draft = true; }
+         else {
+           try { result = await api('/api/generate', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({prompt, count: Number($('count').value), ids, web: $('web-search').checked})}); }
+           catch (err) { if (!err.offline) throw err; result = draftSlides(prompt, Number($('count').value)); draft = true; }
+         }
+         if (!confirm('Заменить текущие слайды новыми? Сохраните проект, если хотите оставить прежнюю версию.')) { generationStatus('Создание отменено.'); return; }
+         const template = templates.find(t => t.id === $('generation-template').value);
+         project = {title: result.title, theme: $('theme').value, slides: useTemplateSlides(result.slides, template), sources: result.sources}; selected = 0; render();
+         const sources = $('source-results'); sources.replaceChildren();
+         if (result.sources.length) {
+           sources.append(element('b', '', 'Использованные источники: '));
+           result.sources.forEach((source, index) => { const row = element('div'); row.append(document.createTextNode(`[${index + 1}] `)); if (source.url) { const link = element('a', '', source.title); link.href = source.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; row.append(link); } else row.append(document.createTextNode(`${source.title} (библиотека)`)); sources.append(row); });
+         }
+         generationStatus(draft ? 'Создан локальный черновик без поиска и проверенных фактов. Для работы с источниками запустите python presentation_server.py и откройте http://127.0.0.1:8766/.' : result.warning || 'Слайды созданы по источникам. Проверьте факты и при необходимости отредактируйте текст.');
+       } catch (err) { generationStatus(err.message || 'Не удалось создать слайды. Проверьте подключение к серверу.'); }
+       finally { button.disabled = false; }
+     });
+     loadLibrary();
+    $('theme').addEventListener('change', e => { project.theme = e.target.value; renderList(); renderCanvas(); persist(); });
+    for (const [id, key] of [['slide-type','type'],['slide-kicker','kicker'],['slide-title','title'],['slide-body','body']]) {
+      $(id).addEventListener('input', e => { project.slides[selected][key] = e.target.value; renderCanvas(); renderList(); persist(); });
+    }
+    $('add-slide').addEventListener('click', () => { project.slides.splice(selected + 1, 0, freshSlide()); selected++; render(); status('Новый слайд добавлен.'); });
+    $('duplicate-slide').addEventListener('click', () => { project.slides.splice(selected + 1, 0, { ...project.slides[selected] }); selected++; render(); status('Слайд скопирован.'); });
+    $('delete-slide').addEventListener('click', () => { if (project.slides.length === 1) { status('Нельзя удалить единственный слайд.'); return; } project.slides.splice(selected, 1); selected = Math.min(selected, project.slides.length - 1); render(); status('Слайд удалён.'); });
+    function move(delta) { const target = selected + delta; if (target < 0 || target >= project.slides.length) return; [project.slides[selected], project.slides[target]] = [project.slides[target], project.slides[selected]]; selected = target; render(); }
+    $('move-left').addEventListener('click', () => move(-1)); $('move-right').addEventListener('click', () => move(1));
+    $('new-project').addEventListener('click', () => { if (!confirm('Создать пустую презентацию? Текущие слайды будут заменены.')) return; project = { title: 'Новая презентация', theme: 'night', slides: [freshSlide('cover', 'Название презентации', 'Подзаголовок или автор')] }; selected = 0; render(); });
+    $('slide-image').addEventListener('change', async e => {
+      const file = e.target.files[0]; if (!file) return;
+      if (!['image/png','image/jpeg'].includes(file.type) || file.size > 4 * 1024 * 1024) { status('Выберите PNG или JPEG размером до 4 МБ.'); e.target.value = ''; return; }
+      const index = selected;
+      const image = await new Promise(resolve => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => resolve(null); reader.readAsDataURL(file); });
+      if (!image) { status('Не удалось прочитать изображение.'); return; }
+      project.slides[index].image = image; project.slides[index].type = 'image'; e.target.value = ''; render(); status('Изображение добавлено на слайд.');
+    });
+    function download(blob, name) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); }
+    function fileName(extension) { return (project.title.replace(/[\\/:*?"<>|]/g, '').trim().slice(0, 70) || 'Презентация') + '.' + extension; }
+    $('save-project').addEventListener('click', () => { download(new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' }), fileName('json')); status('Проект сохранён в JSON. Позже его можно открыть здесь.'); });
+    $('import-project').addEventListener('click', () => $('project-file').click());
+    $('open-project').addEventListener('click', () => $('project-file').click());
+    $('project-file').addEventListener('change', async e => { const file = e.target.files[0]; if (!file) return; try { const value = JSON.parse(await file.text()); if (!validate(value)) throw Error('Некорректный формат'); if (!confirm('Заменить текущий проект загруженным?')) return; project = value; selected = 0; render(); status('Проект открыт.'); } catch { status('Не удалось открыть проект: нужен JSON, сохранённый в Слайдовой.'); } finally { e.target.value = ''; } });
+    // ZIP (store) + DrawingML: creates an editable PPTX locally, without CDN or a server.
+    const enc = new TextEncoder();
+    const xml = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;').replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'');
+    const hex = s => s.replace('#','').toUpperCase();
+    const E = n => Math.round(n * 914400);
+    let shapeId;
+    function rect(x,y,w,h,color,round=false) { const id=shapeId++; return `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="Shape ${id}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="${E(x)}" y="${E(y)}"/><a:ext cx="${E(w)}" cy="${E(h)}"/></a:xfrm><a:prstGeom prst="${round?'roundRect':'rect'}"><a:avLst/></a:prstGeom><a:solidFill><a:srgbClr val="${hex(color)}"/></a:solidFill><a:ln><a:noFill/></a:ln></p:spPr></p:sp>`; }
+    function textBox(x,y,w,h,text,size,color,bold=false) { const id=shapeId++; const paragraphs=String(text).split('\n').map(line => `<a:p><a:pPr/><a:r><a:rPr lang="ru-RU" sz="${Math.round(size*100)}" b="${bold?1:0}"><a:solidFill><a:srgbClr val="${hex(color)}"/></a:solidFill></a:rPr><a:t>${xml(line)}</a:t></a:r><a:endParaRPr lang="ru-RU"/></a:p>`).join(''); return `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="Text ${id}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="${E(x)}" y="${E(y)}"/><a:ext cx="${E(w)}" cy="${E(h)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></p:spPr><p:txBody><a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"/><a:lstStyle/>${paragraphs}</p:txBody></p:sp>`; }
+    function imageShape(x,y,w,h,rId) { const id=shapeId++; return `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="Image ${id}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rId}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="${E(x)}" y="${E(y)}"/><a:ext cx="${E(w)}" cy="${E(h)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`; }
+    function slideXml(slide, index, theme, hasImage) {
+      shapeId = 2;
+      let shapes = rect(0,0,13.333,7.5,theme.bg);
+      shapes += rect(11.05,.58,1.18,.04,theme.accent);
+      shapes += rect(11.75,6.23,1.58,1.27,theme.accent,true);
+      const narrow = slide.type==='split'||slide.type==='image'||hasImage;
+      if (narrow && !hasImage) shapes += rect(8.5,1.48,3.7,4.6,theme.accent,true);
+      if (hasImage) shapes += imageShape(8.25,1.3,4.05,4.95,'rId2');
+      const width = narrow ? 6.65 : 10.5;
+      shapes += textBox(1.05,1.22,width,.38,(slide.kicker||'ПРЕЗЕНТАЦИЯ').toUpperCase(),12,theme.accent,true);
+      const titleSize = slide.type==='cover' ? 38 : (slide.title.length > 65 ? 25 : 31);
+      shapes += textBox(1.05,2.03,width,2.15,slide.title,titleSize,theme.fg,true);
+      if (slide.type==='bullets') { slide.body.split('\n').filter(Boolean).slice(0,7).forEach((line,j) => { shapes += rect(1.08,4.37+j*.37,.085,.085,theme.accent,true); shapes += textBox(1.34,4.26+j*.37,width-.4,.32,line,16,theme.sub); }); }
+      else shapes += textBox(1.05,4.47,width,1.45,slide.body,slide.type==='cover'?19:16,theme.sub);
+      shapes += textBox(11.8,6.75,.55,.32,String(index+1).padStart(2,'0'),11,theme.fg,true);
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+    }
+    const REL='http://schemas.openxmlformats.org/package/2006/relationships';
+    function rels(items) { return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${REL}">${items.map(([id,type,target])=>`<Relationship Id="${id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/${type}" Target="${target}"/>`).join('')}</Relationships>`; }
+    function baseTree() { return '<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree>'; }
+    function b64bytes(data) { const raw=atob(data.split(',')[1]); const out=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i); return out; }
+    function pptxFiles() {
+      const files=[], add=(name,data)=>files.push({name,data:typeof data==='string'?enc.encode(data):data});
+      const slides=project.slides, t=THEMES[project.theme];
+      let content=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpg" ContentType="image/jpeg"/><Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/><Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>`;
+      slides.forEach((s,i)=>{ content+=`<Override PartName="/ppt/slides/slide${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`; });
+      add('[Content_Types].xml',content+'</Types>');
+      add('_rels/.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${REL}"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`);
+      add('docProps/core.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${xml(project.title)}</dc:title><dc:creator>Слайдовая</dc:creator><cp:lastModifiedBy>Слайдовая</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:created></cp:coreProperties>`);
+      add('docProps/app.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>Microsoft Office PowerPoint</Application><Slides>${slides.length}</Slides><PresentationFormat>On-screen Show (16:9)</PresentationFormat></Properties>`);
+      add('ppt/presentation.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst><p:sldIdLst>${slides.map((_,i)=>`<p:sldId id="${256+i}" r:id="rId${i+2}"/>`).join('')}</p:sldIdLst><p:sldSz cx="12192000" cy="6858000" type="screen16x9"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`);
+      add('ppt/_rels/presentation.xml.rels',rels([['rId1','slideMaster','slideMasters/slideMaster1.xml'],...slides.map((_,i)=>[`rId${i+2}`,'slide',`slides/slide${i+1}.xml`])]));
+      add('ppt/slideMasters/slideMaster1.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld>${baseTree()}</p:cSld><p:clrMap accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" bg1="lt1" bg2="lt2" folHlink="folHlink" hlink="hlink" tx1="dk1" tx2="dk2"/><p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle/><p:bodyStyle/><p:otherStyle/></p:txStyles></p:sldMaster>`);
+      add('ppt/slideMasters/_rels/slideMaster1.xml.rels',rels([['rId1','slideLayout','../slideLayouts/slideLayout1.xml'],['rId2','theme','../theme/theme1.xml']]));
+      add('ppt/slideLayouts/slideLayout1.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="blank" preserve="1"><p:cSld name="Blank">${baseTree()}</p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`);
+      add('ppt/slideLayouts/_rels/slideLayout1.xml.rels',rels([['rId1','slideMaster','../slideMasters/slideMaster1.xml']]));
+      add('ppt/theme/theme1.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Slide Studio"><a:themeElements><a:clrScheme name="Studio"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="${t.bg}"/></a:dk2><a:lt2><a:srgbClr val="FFFFFF"/></a:lt2><a:accent1><a:srgbClr val="${t.accent}"/></a:accent1><a:accent2><a:srgbClr val="${t.fg}"/></a:accent2><a:accent3><a:srgbClr val="${t.sub}"/></a:accent3><a:accent4><a:srgbClr val="6688AA"/></a:accent4><a:accent5><a:srgbClr val="8855AA"/></a:accent5><a:accent6><a:srgbClr val="55AA88"/></a:accent6><a:hlink><a:srgbClr val="6744E8"/></a:hlink><a:folHlink><a:srgbClr val="664488"/></a:folHlink></a:clrScheme><a:fontScheme name="Studio"><a:majorFont><a:latin typeface="Aptos Display"/></a:majorFont><a:minorFont><a:latin typeface="Aptos"/></a:minorFont></a:fontScheme><a:fmtScheme name="Studio"><a:fillStyleLst><a:solidFill><a:schemeClr val="accent1"/></a:solidFill></a:fillStyleLst><a:lnStyleLst><a:ln w="9525"><a:solidFill><a:schemeClr val="accent1"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="lt1"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements></a:theme>`);
+      slides.forEach((s,i)=>{
+        let withImage=false;
+        if (s.image && /^data:image\/(png|jpeg);base64,/.test(s.image)) { try { const ext=s.image.startsWith('data:image/png;')?'png':'jpg'; add(`ppt/media/image${i+1}.${ext}`,b64bytes(s.image)); withImage=true; add(`ppt/slides/_rels/slide${i+1}.xml.rels`,rels([['rId1','slideLayout','../slideLayouts/slideLayout1.xml'],['rId2','image',`../media/image${i+1}.${ext}`]])); } catch { /* malformed image: export text instead */ } }
+        if (!withImage) add(`ppt/slides/_rels/slide${i+1}.xml.rels`,rels([['rId1','slideLayout','../slideLayouts/slideLayout1.xml']]));
+        add(`ppt/slides/slide${i+1}.xml`,slideXml(s,i,t,withImage));
+      });
+      return files;
+    }
+    const crcTable=(()=>{ const table=new Uint32Array(256); for(let n=0;n<256;n++){let c=n; for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1; table[n]=c>>>0;} return table; })();
+    function crc32(bytes) { let c=0xFFFFFFFF; for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+    function zip(files) {
+      const chunks=[], directory=[]; let offset=0;
+      const u16=(view,o,n)=>view.setUint16(o,n,true), u32=(view,o,n)=>view.setUint32(o,n,true);
+      for(const f of files){ const name=enc.encode(f.name), data=f.data, crc=crc32(data), local=new Uint8Array(30+name.length), v=new DataView(local.buffer);
+        u32(v,0,0x04034b50);u16(v,4,20);u16(v,8,0);u32(v,14,crc);u32(v,18,data.length);u32(v,22,data.length);u16(v,26,name.length);local.set(name,30);
+        const central=new Uint8Array(46+name.length), d=new DataView(central.buffer);u32(d,0,0x02014b50);u16(d,4,20);u16(d,6,20);u32(d,16,crc);u32(d,20,data.length);u32(d,24,data.length);u16(d,28,name.length);u32(d,42,offset);central.set(name,46);
+        directory.push(central);chunks.push(local,data);offset+=local.length+data.length;
+      }
+      const end=new Uint8Array(22), view=new DataView(end.buffer);u32(view,0,0x06054b50);u16(view,8,files.length);u16(view,10,files.length);const dirSize=directory.reduce((n,b)=>n+b.length,0);u32(view,12,dirSize);u32(view,16,offset);
+      return new Blob([...chunks,...directory,end],{type:'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
+    }
+    $('export-pptx').addEventListener('click', () => { try { download(zip(pptxFiles()),fileName('pptx')); status('PPTX скачан. Заголовки, текст и фигуры редактируются в PowerPoint.'); } catch (err) { console.error(err); status('Ошибка экспорта. Попробуйте сохранить проект и обновить страницу.'); } });
+    render();
+  </script>
+</body>
+</html>
